@@ -10,6 +10,7 @@ namespace ADSucoremaExtensibilidade
     {
         public override void TeclaPressionada(int KeyCode, int Shift, ExtensibilityEventArgs e)
         {
+            
             if (KeyCode == Convert.ToInt32(Keys.A))
             {
 

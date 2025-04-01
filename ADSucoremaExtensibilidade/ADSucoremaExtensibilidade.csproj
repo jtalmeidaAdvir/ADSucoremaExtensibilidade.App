@@ -124,6 +124,9 @@
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\APL\IGprBS100.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="IGprDS100">
+      <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\IGprDS100.dll</HintPath>
+    </Reference>
     <Reference Include="IIntBS100">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\IIntBS100.dll</HintPath>
     </Reference>
@@ -167,6 +170,9 @@
     <Reference Include="Primavera.Extensibility.Internal">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\Primavera.Extensibility.Internal.dll</HintPath>
     </Reference>
+    <Reference Include="Primavera.Extensibility.POS">
+      <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\Primavera.Extensibility.POS.dll</HintPath>
+    </Reference>
     <Reference Include="Primavera.Extensibility.Production">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\APL\Primavera.Extensibility.Production.dll</HintPath>
       <Private>False</Private>
@@ -177,6 +183,9 @@
     </Reference>
     <Reference Include="Primavera.Extensibility.Sales">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\Primavera.Extensibility.Sales.dll</HintPath>
+    </Reference>
+    <Reference Include="Primavera.Platform.Collections">
+      <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\Primavera.Platform.Collections.dll</HintPath>
     </Reference>
     <Reference Include="PriTextBoxF4100">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\PriTextBoxF4100.dll</HintPath>
@@ -218,11 +227,29 @@
     <Compile Include="EditorArtigosUnidade.Designer.cs">
       <DependentUpon>EditorArtigosUnidade.cs</DependentUpon>
     </Compile>
+    <Compile Include="EditorImportarExelOF.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EditorImportarExelOF.Designer.cs">
+      <DependentUpon>EditorImportarExelOF.cs</DependentUpon>
+    </Compile>
     <Compile Include="EditorOrdemFabricoStocks.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="EditorOrdemFabricoStocks.Designer.cs">
       <DependentUpon>EditorOrdemFabricoStocks.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EditorValores.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EditorValores.Designer.cs">
+      <DependentUpon>EditorValores.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntradaOFValorizadas.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EntradaOFValorizadas.Designer.cs">
+      <DependentUpon>EntradaOFValorizadas.cs</DependentUpon>
     </Compile>
     <Compile Include="FrmProject.cs">
       <SubType>Form</SubType>
@@ -255,6 +282,7 @@
     <Compile Include="UiEditorInternos.cs" />
     <Compile Include="UiEditorProducao.cs" />
     <Compile Include="UiOrdensFabrico.cs" />
+    <Compile Include="ValorizarOF.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="EditorArtigosUnidade.resx">
@@ -262,6 +290,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EditorOrdemFabricoStocks.resx">
       <DependentUpon>EditorOrdemFabricoStocks.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EditorValores.resx">
+      <DependentUpon>EditorValores.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntradaOFValorizadas.resx">
+      <DependentUpon>EntradaOFValorizadas.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="FrmProject.resx">
       <DependentUpon>FrmProject.cs</DependentUpon>
