@@ -62,31 +62,6 @@ namespace ADSucoremaExtensibilidade
             }
         }
 
-        
-        public override void AntesDeGravarDocumentoCompra(ref CmpBEDocumentoCompra DocumentoCompra, ref bool Cancel, ExtensibilityEventArgs e)
-        {
-            /*EDITAR NAS ENCOMENDAS
-            base.AntesDeGravarDocumentoCompra(ref DocumentoCompra, ref Cancel, e);
-            var numLinhas = DocumentoCompra.Linhas.NumItens;
-            for (var i = 1; i <= numLinhas; i++)
-            {
-                var linha = DocumentoCompra.Linhas.GetEdita(i);
-                if (linha != null)
-                {
-                    MessageBox.Show(linha.Artigo);
-                    MessageBox.Show(linha.PrecUnit.ToString());
-                    linha.PrecUnit = 99.00;
-                    linha.Descricao = "Teste";
-                }
-            }
-            */
-        }
-
-
-
-
-
-
 
     }
 }

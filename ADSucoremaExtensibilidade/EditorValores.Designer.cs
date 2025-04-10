@@ -43,6 +43,10 @@
             this.label5 = new System.Windows.Forms.Label();
             this.txt_artigo = new System.Windows.Forms.TextBox();
             this.label6 = new System.Windows.Forms.Label();
+            this.TXT_qtdsof = new System.Windows.Forms.TextBox();
+            this.TXT_qtdeof = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -82,7 +86,7 @@
             // TXT_ValorOF
             // 
             this.TXT_ValorOF.Enabled = false;
-            this.TXT_ValorOF.Location = new System.Drawing.Point(180, 160);
+            this.TXT_ValorOF.Location = new System.Drawing.Point(209, 162);
             this.TXT_ValorOF.Name = "TXT_ValorOF";
             this.TXT_ValorOF.Size = new System.Drawing.Size(120, 23);
             this.TXT_ValorOF.TabIndex = 5;
@@ -90,7 +94,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(206, 144);
+            this.label3.Location = new System.Drawing.Point(239, 144);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(54, 15);
             this.label3.TabIndex = 4;
@@ -98,7 +102,7 @@
             // 
             // TXT_ValorOF30
             // 
-            this.TXT_ValorOF30.Location = new System.Drawing.Point(326, 160);
+            this.TXT_ValorOF30.Location = new System.Drawing.Point(335, 162);
             this.TXT_ValorOF30.Name = "TXT_ValorOF30";
             this.TXT_ValorOF30.Size = new System.Drawing.Size(100, 23);
             this.TXT_ValorOF30.TabIndex = 7;
@@ -106,7 +110,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(331, 144);
+            this.label4.Location = new System.Drawing.Point(341, 144);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(88, 15);
             this.label4.TabIndex = 6;
@@ -149,6 +153,7 @@
             this.txt_sof.Name = "txt_sof";
             this.txt_sof.Size = new System.Drawing.Size(126, 23);
             this.txt_sof.TabIndex = 12;
+            this.txt_sof.Visible = false;
             // 
             // label5
             // 
@@ -158,13 +163,14 @@
             this.label5.Size = new System.Drawing.Size(28, 15);
             this.label5.TabIndex = 11;
             this.label5.Text = "SOF";
+            this.label5.Visible = false;
             // 
             // txt_artigo
             // 
             this.txt_artigo.Enabled = false;
-            this.txt_artigo.Location = new System.Drawing.Point(180, 110);
+            this.txt_artigo.Location = new System.Drawing.Point(209, 110);
             this.txt_artigo.Name = "txt_artigo";
-            this.txt_artigo.Size = new System.Drawing.Size(246, 23);
+            this.txt_artigo.Size = new System.Drawing.Size(226, 23);
             this.txt_artigo.TabIndex = 13;
             // 
             // label6
@@ -176,10 +182,50 @@
             this.label6.TabIndex = 14;
             this.label6.Text = "Artigo";
             // 
+            // TXT_qtdsof
+            // 
+            this.TXT_qtdsof.Enabled = false;
+            this.TXT_qtdsof.Location = new System.Drawing.Point(142, 110);
+            this.TXT_qtdsof.Name = "TXT_qtdsof";
+            this.TXT_qtdsof.Size = new System.Drawing.Size(40, 23);
+            this.TXT_qtdsof.TabIndex = 15;
+            this.TXT_qtdsof.Visible = false;
+            // 
+            // TXT_qtdeof
+            // 
+            this.TXT_qtdeof.Enabled = false;
+            this.TXT_qtdeof.Location = new System.Drawing.Point(142, 162);
+            this.TXT_qtdeof.Name = "TXT_qtdeof";
+            this.TXT_qtdeof.Size = new System.Drawing.Size(40, 23);
+            this.TXT_qtdeof.TabIndex = 16;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(147, 92);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(30, 15);
+            this.label7.TabIndex = 17;
+            this.label7.Text = "QTD";
+            this.label7.Visible = false;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(147, 144);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(30, 15);
+            this.label8.TabIndex = 18;
+            this.label8.Text = "QTD";
+            // 
             // EditorValores
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.TXT_qtdeof);
+            this.Controls.Add(this.TXT_qtdsof);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.txt_artigo);
             this.Controls.Add(this.txt_sof);
@@ -224,5 +270,9 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox txt_artigo;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox TXT_qtdsof;
+        private System.Windows.Forms.TextBox TXT_qtdeof;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label8;
     }
 }

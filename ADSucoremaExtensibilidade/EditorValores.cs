@@ -33,8 +33,9 @@ namespace ADSucoremaExtensibilidade
 
             txt_artigo.Text = Artigo;
 
-            var querySOF = $@"		SELECT 
-                                ABS(l.PrecUnit) AS PrecUnit
+            /*var querySOF = $@"		SELECT 
+                                ABS(l.PrecUnit) AS PrecUnit,
+                                l.Quantidade
                             FROM GPR_OrdemFabrico o
                             JOIN CabecInternos c ON c.IdOrdemFabrico = o.IDOrdemFabrico
                             JOIN LinhasInternos l ON l.IdCabecInternos = c.Id
@@ -43,10 +44,21 @@ namespace ADSucoremaExtensibilidade
 
             var valorSOF = BSO.Consulta(querySOF);
 
-            txt_sof.Text = valorSOF.DaValor<string>("PrecUnit");
+              txt_sof.Text = valorSOF.DaValor<string>("PrecUnit");
+            */
+
+
+
+            var queryQuantidade = $@"SELECT QtFabricada FROM GPR_OrdemFabrico WHERE ordemFabrico = '{OrdemFabrico}'";
+            var quantidades = BSO.Consulta(queryQuantidade);
+
+          
+            TXT_qtdsof.Text = quantidades.DaValor<string>("QtFabricada");
+
 
             var queryEOF = $@"SELECT 
-                                ABS(l.PrecUnit) AS PrecUnit
+                                ABS(l.PrecUnit) AS PrecUnit,
+                                ABS(l.Quantidade) AS Quantidade
                             FROM GPR_OrdemFabrico o
                             JOIN CabecInternos c ON c.IdOrdemFabrico = o.IDOrdemFabrico
                             JOIN LinhasInternos l ON l.IdCabecInternos = c.Id
@@ -56,6 +68,7 @@ namespace ADSucoremaExtensibilidade
             var valorEOF = BSO.Consulta(queryEOF);
 
             txt_valorEOF.Text = valorEOF.DaValor<string>("PrecUnit");
+            TXT_qtdeof.Text = quantidades.DaValor<string>("QtFabricada");
 
             var queryOF = $@"SELECT 
                             COALESCE(CustoMateriaisReal, 0) +
@@ -103,34 +116,66 @@ namespace ADSucoremaExtensibilidade
             // Pega o valor do campo de texto, que está com a vírgula
             var numberStr = TXT_ValorOF30.Text;
 
+            var quantidadeSOF = TXT_qtdsof.Text;
+            var quantidadeEOF = TXT_qtdeof.Text;
+
+
             // Substitui a vírgula por ponto
             numberStr = numberStr.Replace(",", ".");
 
-            var queryUpdate = $@"UPDATE LinhasInternos 
-                                SET PrecUnit = {numberStr}
-                                WHERE IdCabecInternos IN (
-                                    SELECT c.Id 
-                                    FROM GPR_OrdemFabrico o
-                                    JOIN CabecInternos c ON c.IdOrdemFabrico = o.IDOrdemFabrico
-                                    WHERE o.OrdemFabrico = '{OrdemFabrico}'
-                                    AND c.TipoDoc = 'EOF'
-                                );";
-            BSO.DSO.ExecuteSQL(queryUpdate);
+            quantidadeSOF = quantidadeSOF.Replace(",", ".");
+            quantidadeEOF = quantidadeEOF.Replace(",", ".");
 
 
-            var queryupdateSOF = $@"UPDATE LinhasInternos 
-                                    SET PrecUnit = {numberStr}
-                                    WHERE IdCabecInternos IN (
-                                        SELECT c.Id
-                                        FROM GPR_OrdemFabrico o
-                                        JOIN CabecInternos c ON c.IdOrdemFabrico = o.IDOrdemFabrico
-                                        WHERE c.TipoDoc = 'SOF'
-                                    ) 
-                                    AND Artigo = '{Artigo}';";
-            BSO.DSO.ExecuteSQL(queryupdateSOF);
+
+            //////////////////////////////
+            
+
+
+            var querydocEOF = $@"SELECT 
+                                c.TipoDoc, c.NumDoc, c.Serie, c.Filial, l.Artigo
+                            FROM GPR_OrdemFabrico g
+                            LEFT JOIN CabecInternos c ON g.IDOrdemFabrico = c.IdordemFabrico
+                            LEFT JOIN LinhasInternos l ON c.Id = l.IdcabecInternos
+                            WHERE g.OrdemFabrico = '{OrdemFabrico}' AND l.Artigo = '{Artigo}';
+                            ";
+            var docsql = BSO.Consulta(querydocEOF);
+            var num = docsql.NumLinhas();
+            docsql.Inicio();
+            for (int i = 0; i < num; i++)
+            {
+                var tipoDoc = docsql.DaValor<string>("TipoDoc");
+                var numDoc = docsql.DaValor<int>("NumDoc");
+                var serieDoc = docsql.DaValor<string>("Serie");
+                var filialDoc = docsql.DaValor<string>("Filial");
+
+                var doc = BSO.Internos.Documentos.Edita(tipoDoc, numDoc, serieDoc, filialDoc);
+                var numli = doc.Linhas.NumItens;
+                for (int y = 1; y < numli + 1; y++)
+                {
+                    var linha = doc.Linhas.GetEdita(y);
+                    if(linha.Artigo == Artigo)
+                    {
+                        if (double.TryParse(numberStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double valor) &&
+                        double.TryParse(quantidadeEOF, NumberStyles.Any, CultureInfo.InvariantCulture, out double quantidade) &&
+                        quantidade != 0)
+                        {
+
+                            double resultado = valor / quantidade;
+                            linha.PrecUnit = resultado;
+
+                        }
+                    }
+
+                }
+
+                BSO.Internos.Documentos.Actualiza(doc);
+
+                docsql.Seguinte();
+            }
+
 
             MessageBox.Show("Ordem de Fabrico atualizada com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
             // Fecha o formulário
             this.Close();
         }

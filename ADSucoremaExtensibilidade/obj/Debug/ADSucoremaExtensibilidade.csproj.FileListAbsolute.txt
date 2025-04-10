@@ -10,10 +10,7 @@ C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilid
 C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilidade\bin\Debug\Newtonsoft.Json.xml
 C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilidade\obj\Debug\ADSucore.6E0311FC.Up2Date
 C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilidade\obj\Debug\ExtensibilityPrimaveraJLA.FrmProject.resources
-C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilidade\bin\Debug\IIntBS100.dll
-C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilidade\bin\Debug\IntBE100.dll
 C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilidade\bin\Debug\IVndBS100.dll
-C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilidade\bin\Debug\Primavera.Extensibility.Internal.dll
 C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilidade\bin\Debug\Primavera.Extensibility.Sales.dll
 C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilidade\bin\Debug\PriTextBoxF4100.dll
 C:\Users\jtalm\source\repos\ADSucoremaExtensibilidade.App\ADSucoremaExtensibilidade\bin\Debug\VndBE100.dll

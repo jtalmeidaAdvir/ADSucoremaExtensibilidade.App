@@ -129,9 +129,11 @@
     </Reference>
     <Reference Include="IIntBS100">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\IIntBS100.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="IntBE100">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\IntBE100.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="IVndBS100">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\IVndBS100.dll</HintPath>
@@ -169,6 +171,7 @@
     </Reference>
     <Reference Include="Primavera.Extensibility.Internal">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\Primavera.Extensibility.Internal.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Primavera.Extensibility.POS">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\Primavera.Extensibility.POS.dll</HintPath>
