@@ -342,8 +342,10 @@ namespace ADSucoremaExtensibilidade
 
         public void ReabreOF()
         {
-
-            BSO.Producao.OrdensFabrico.ReabreOrdemFabrico("2400310.00");
+  
+            BSO.Producao.OrdensFabrico.ActualizaPrecoPrevistoOF("2400951.00");
+            BSO.Producao.OrdensFabrico.ActualizaPrecoPrevisto();
+            MessageBox.Show("Valorizado");
         }
 
     }
