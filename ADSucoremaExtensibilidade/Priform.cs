@@ -387,6 +387,11 @@ namespace ADSucoremaExtensibilidade
         {
 
         }
+
+        private void ch_trataSerie_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 
 

@@ -36,15 +36,23 @@ namespace ADSucoremaExtensibilidade
             Base.SelectedItem = artigos["UnidadeBase"];
             Saida.SelectedItem = artigos["Unidadesaida"];
             Entrada.SelectedItem = artigos["UnidadeEntrada"];
+            if(artigos["TratamentoSeries"] == "True")
+            {
+                checkBox1.Checked = true;
+            }
+            else
+            {
+                checkBox1.Checked = false;
+            }
         }
 
         private void GetArtigos(ref Dictionary<string, string> artigos)
         {
             string NomeLista = "Artigo";
-            string Campos = "Artigo,Descricao,UnidadeVenda,UnidadeBase,Unidadesaida,unidadeCompra,UnidadeEntrada";
+            string Campos = "Artigo,Descricao,UnidadeVenda,UnidadeBase,Unidadesaida,unidadeCompra,UnidadeEntrada,TratamentoSeries";
             string Tabela = "Artigo (NOLOCK)";
             string Where = "";
-            string CamposF4 = "Artigo,Descricao,UnidadeVenda,UnidadeBase,Unidadesaida,unidadeCompra,UnidadeEntrada";
+            string CamposF4 = "Artigo,Descricao,UnidadeVenda,UnidadeBase,Unidadesaida,unidadeCompra,UnidadeEntrada,TratamentoSeries";
             string orderby = "Artigo";
 
             List<string> ResQuery = new List<string>();
@@ -101,9 +109,46 @@ namespace ADSucoremaExtensibilidade
                                 WHERE Artigo = '{TXT_Artigo.Text}'";
             BSO.DSO.ExecuteSQL(updateArtigoMoeda);
 
+            if (checkBox1.Checked)
+            {
+                var updateArtigoTratamento = $@"
+                                UPDATE Artigo
+                                SET TratamentoSeries = 1
+                                WHERE Artigo = '{TXT_Artigo.Text}'";
+                BSO.DSO.ExecuteSQL(updateArtigoTratamento);
+            }
+            else
+            {
+                var updateArtigoTratamento = $@"
+                                UPDATE Artigo
+                                SET TratamentoSeries = 0
+                                WHERE Artigo = '{TXT_Artigo.Text}'";
+                BSO.DSO.ExecuteSQL(updateArtigoTratamento);
+            }
+
             MessageBox.Show("Atualização realizada com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             this.Close();
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            /*
+            string query = string.Empty;
+            if (checkBox1.Checked)
+            {
+                 query = $@"UPDATE Artigo 
+                            SET TratamentoSeries = 1
+                            WHERE Artigo = '{TXT_Artigo.Text}'";
+            }
+            else
+            {
+                 query = $@"UPDATE Artigo 
+                            SET TratamentoSeries = 0
+                            WHERE Artigo = '{TXT_Artigo.Text}'";
+            }
+
+            BSO.DSO.ExecuteSQL(query);*/
         }
     }
 }

@@ -42,6 +42,7 @@
             this.Venda = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.Guardar = new System.Windows.Forms.Button();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // TXT_Artigo
@@ -237,10 +238,22 @@
             this.Guardar.UseVisualStyleBackColor = true;
             this.Guardar.Click += new System.EventHandler(this.Guardar_Click);
             // 
+            // checkBox1
+            // 
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(303, 20);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(122, 17);
+            this.checkBox1.TabIndex = 19;
+            this.checkBox1.Text = "Gestão de N.ºs Série";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            // 
             // EditorArtigosUnidade
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.Guardar);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.Venda);
@@ -281,5 +294,6 @@
         private System.Windows.Forms.ComboBox Venda;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button Guardar;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
