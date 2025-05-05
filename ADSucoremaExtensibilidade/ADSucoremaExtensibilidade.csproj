@@ -285,6 +285,7 @@
     <Compile Include="UiEditorInternos.cs" />
     <Compile Include="UiEditorProducao.cs" />
     <Compile Include="UiOrdensFabrico.cs" />
+    <Compile Include="ValorizaOfProducao.cs" />
     <Compile Include="ValorizarOF.cs" />
   </ItemGroup>
   <ItemGroup>
