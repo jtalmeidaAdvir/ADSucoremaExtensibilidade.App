@@ -99,47 +99,60 @@ namespace ADSucoremaExtensibilidade
                 var numLinhas = lista.NumLinhas();
                 if (numLinhas == 0)
                 {
+                    var deleteQuery = $@"
+                        DELETE FROM GPR_OrdemFabricoOutrosCustos
+                         WHERE IDOrdemFabrico = {iDOrdemFabrico}
+                           AND Descricao = 'Encargo de 30% sobre materiais'
+                    ";
+                    BSO.DSO.ExecuteSQL(deleteQuery);
 
-                    return;
+                    var updateQuery = $@"
+                        UPDATE GPR_OrdemFabrico
+                           SET CDU_Valorizado = 0
+                         WHERE IDOrdemFabrico = {iDOrdemFabrico}
+                    ";
+                    BSO.DSO.ExecuteSQL(updateQuery);
                 }
-
-                lista.Inicio();
-                for (int i = 0; i < numLinhas; i++)
+                else
                 {
-                    try
+                    lista.Inicio();
+                    for (int i = 0; i < numLinhas; i++)
                     {
-                        var tipoDoc = lista.DaValor<string>("TipoDoc");
-                        var numDoc = lista.DaValor<int>("NumDoc");
-                        var serie = lista.DaValor<string>("Serie");
-                        var filial = lista.DaValor<string>("Filial");
-                        var idOrdemFabrico = lista.DaValor<int>("IdOrdemFabrico");
+                        try
+                        {
+                            var tipoDoc = lista.DaValor<string>("TipoDoc");
+                            var numDoc = lista.DaValor<int>("NumDoc");
+                            var serie = lista.DaValor<string>("Serie");
+                            var filial = lista.DaValor<string>("Filial");
+                            var idOrdemFabrico = lista.DaValor<int>("IdOrdemFabrico");
 
-                        // 1) Eliminar o registo na GPR_OrdemFabricoOutrosCustos
-                        var deleteQuery = $@"
-                    DELETE FROM GPR_OrdemFabricoOutrosCustos
-                     WHERE IDOrdemFabrico = {idOrdemFabrico}
-                       AND Descricao = 'Encargo de 30% sobre materiais'
-                ";
-                        BSO.DSO.ExecuteSQL(deleteQuery);
+                            // 1) Eliminar o registo na GPR_OrdemFabricoOutrosCustos
+                            var deleteQuery = $@"
+                        DELETE FROM GPR_OrdemFabricoOutrosCustos
+                         WHERE IDOrdemFabrico = {idOrdemFabrico}
+                           AND Descricao = 'Encargo de 30% sobre materiais'
+                    ";
+                            BSO.DSO.ExecuteSQL(deleteQuery);
 
-                        // 2) Voltar a marcar a Ordem de Fabrico como não valorizada
-                        var updateQuery = $@"
-                    UPDATE GPR_OrdemFabrico
-                       SET CDU_Valorizado = 0
-                     WHERE IDOrdemFabrico = {idOrdemFabrico}
-                ";
-                        BSO.DSO.ExecuteSQL(updateQuery);
+                            // 2) Voltar a marcar a Ordem de Fabrico como não valorizada
+                            var updateQuery = $@"
+                        UPDATE GPR_OrdemFabrico
+                           SET CDU_Valorizado = 0
+                         WHERE IDOrdemFabrico = {idOrdemFabrico}
+                    ";
+                            BSO.DSO.ExecuteSQL(updateQuery);
 
+                        }
+                        catch (Exception innerEx)
+                        {
+                            MessageBox.Show($"Ocorreu um erro ao tentar desvalorizar a Ordem de Fabrico: {innerEx.Message}",
+                                            "Erro",
+                                            MessageBoxButtons.OK,
+                                            MessageBoxIcon.Error);
+                        }
+
+                        lista.Seguinte();
                     }
-                    catch (Exception innerEx)
-                    {
-                        MessageBox.Show($"Ocorreu um erro ao tentar desvalorizar a Ordem de Fabrico: {innerEx.Message}",
-                                        "Erro",
-                                        MessageBoxButtons.OK,
-                                        MessageBoxIcon.Error);
-                    }
-
-                    lista.Seguinte();
                 }
             }
             catch (Exception ex)

@@ -65,107 +65,181 @@ namespace ADSucoremaExtensibilidade
                 var lista = BSO.Consulta(query);
                 if (lista == null || lista.NumLinhas() == 0)
                 {
-                    //MessageBox.Show($"Nenhuma informação encontrada para a OF {Of}.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
+
+                    //coloca so a descricao Encargo de 30% sobre materiais
+                    var oFSEOF = $@"SELECT ROUND(ISNULL(CustoMateriaisReal, 0) * 0.3, 2) AS Acrescimo30PorCento
+                          FROM GPR_OrdemFabrico
+                          WHERE IdOrdemFabrico = '{Of}' AND ISNULL(CustoMateriaisReal, 0) <> 0;";
+
+                    var sqlOfSEOF = BSO.Consulta(oFSEOF);
+
+                 
+
+                    if (sqlOfSEOF == null || sqlOfSEOF.NumLinhas() == 0)
+                    {
+                        return;
+                    }
+
+                    var OF = $"SELECT OrdemFabrico FROM GPR_OrdemFabrico WHERE IdOrdemFabrico = '{Of}'";
+
+                    var sqlOfSEOF2 = BSO.Consulta(OF);
+                   // var ordemfabrico = sqlOfSEOF2.DaValor<string>("OrdemFabrico");
+      
+                    var CustoTotalComAcrescimo = sqlOfSEOF.DaValor<double>("Acrescimo30PorCento");
+              
+                    if (CustoTotalComAcrescimo < 0)
+                    {
+                        MessageBox.Show($"Custo calculado negativo para a Ordem de Fabrico {Of}.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    var querySelect = $@"SELECT Descricao FROM GPR_OrdemFabricoOutrosCustos 
+                                         WHERE IDOrdemFabrico = '{Of}' 
+                                         AND Descricao = 'Encargo de 30% sobre materiais'";
+                    var resultadoSelect = BSO.Consulta(querySelect);
+ 
+                    if (resultadoSelect == null || resultadoSelect.NumLinhas() == 0)
+                    {
+            
+                        string custoFormatado = CustoTotalComAcrescimo.ToString().Replace(",", ".");
+
+                        string dataFormatada = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+                        var queryInsert = $@"INSERT INTO GPR_OrdemFabricoOutrosCustos 
+                                             (Custo, Data, Descricao, IDOrdemFabrico)
+                                             VALUES 
+                                             ('{custoFormatado}', '{dataFormatada}', 'Encargo de 30% sobre materiais', '{Of}');";
+
+                        BSO.DSO.ExecuteSQL(queryInsert);
+        
+                    }
+                    var queryUpdate = $@"UPDATE GPR_OrdemFabrico
+                                             SET CDU_Valorizado = 1
+                                             WHERE IDOrdemFabrico = '{Of}'";
+                    BSO.DSO.ExecuteSQL(queryUpdate);
+
+                    var intof = int.Parse(Of);
+                    var aviso = string.Empty;
+                    var ordensFabrico = new OrderedDictionary
+                                    {
+                                        { Guid.NewGuid().ToString(), intof }
+                                    };
+                    BSO.Producao.OrdensFabrico.ProcessaValorizacao(ordensFabrico, true, ref aviso);
+
+
+                   
+                        if (!string.IsNullOrWhiteSpace(aviso))
+                        {
+                           
+                            //MessageBox.Show("A Ordem de Fabrico não foi valorizada por estar bloqueada para edição ou não estar no estado correto:\r\n" + aviso, "Erro na Valorização", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            DesvalorizaEOF(intof);
+                            //return;
+                        }
+
                 }
+                else
+                {
 
-                lista.Inicio();
 
-                var tipoDoc = lista.DaValor<string>("TipoDoc");
-                var numDoc = lista.DaValor<int>("NumDoc");
-                var serie = lista.DaValor<string>("Serie");
-                var filial = lista.DaValor<string>("Filial");
-                var artigo = lista.DaValor<string>("Artigo");
-                var OrdemFabrico = lista.DaValor<string>("OrdemFabrico");
-                var IdOrdemFabrico = lista.DaValor<int>("IdOrdemFabrico");
 
-                var ordemSQL = $@"SELECT ROUND(ISNULL(CustoMateriaisReal, 0) * 0.3, 2) AS Acrescimo30PorCento
+                    lista.Inicio();
+
+                    var tipoDoc = lista.DaValor<string>("TipoDoc");
+                    var numDoc = lista.DaValor<int>("NumDoc");
+                    var serie = lista.DaValor<string>("Serie");
+                    var filial = lista.DaValor<string>("Filial");
+                    var artigo = lista.DaValor<string>("Artigo");
+                    var OrdemFabrico = lista.DaValor<string>("OrdemFabrico");
+                    var IdOrdemFabrico = lista.DaValor<int>("IdOrdemFabrico");
+
+                    var ordemSQL = $@"SELECT ROUND(ISNULL(CustoMateriaisReal, 0) * 0.3, 2) AS Acrescimo30PorCento
                           FROM GPR_OrdemFabrico
                           WHERE IDOrdemFabrico = '{IdOrdemFabrico}' AND ISNULL(CustoMateriaisReal, 0) <> 0;";
-                var ordem = BSO.Consulta(ordemSQL);
-                if (ordem == null || ordem.NumLinhas() == 0)
-                {
-                    MessageBox.Show($"Custo não encontrado para a OF {Of}.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                    var ordem = BSO.Consulta(ordemSQL);
+                    if (ordem == null || ordem.NumLinhas() == 0)
+                    {
+                        MessageBox.Show($"Custo não encontrado para a OF {Of}.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
 
-                var CustoTotalComAcrescimo = ordem.DaValor<double>("Acrescimo30PorCento");
-                if (CustoTotalComAcrescimo < 0)
-                {
-                    MessageBox.Show($"Custo calculado negativo para a Ordem de Fabrico {IdOrdemFabrico}.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+                    var CustoTotalComAcrescimo = ordem.DaValor<double>("Acrescimo30PorCento");
+                    if (CustoTotalComAcrescimo < 0)
+                    {
+                        MessageBox.Show($"Custo calculado negativo para a Ordem de Fabrico {IdOrdemFabrico}.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
 
-                IntBEDocumentoInterno doc;
-                try
-                {
-                    doc = BSO.Internos.Documentos.Edita(tipoDoc, numDoc, serie, filial);
-                }
-                catch (Exception docEx)
-                {
-                    MessageBox.Show($"Erro ao editar documento {tipoDoc} {numDoc}/{serie} - {docEx.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-
-                for (int j = 1; j <= doc.Linhas.NumItens; j++)
-                {
+                    IntBEDocumentoInterno doc;
                     try
                     {
-                        var linha = doc.Linhas.GetEdita(j);
-                        if (linha.Artigo == artigo)
-                        {
-                            BSO.Producao.OrdensFabrico.ReabreOrdemFabrico(OrdemFabrico);
+                        doc = BSO.Internos.Documentos.Edita(tipoDoc, numDoc, serie, filial);
+                    }
+                    catch (Exception docEx)
+                    {
+                        MessageBox.Show($"Erro ao editar documento {tipoDoc} {numDoc}/{serie} - {docEx.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
 
-                            var querySelect = $@"SELECT Descricao FROM GPR_OrdemFabricoOutrosCustos 
+
+                    for (int j = 1; j <= doc.Linhas.NumItens; j++)
+                    {
+                        try
+                        {
+                            var linha = doc.Linhas.GetEdita(j);
+                            if (linha.Artigo == artigo)
+                            {
+                                BSO.Producao.OrdensFabrico.ReabreOrdemFabrico(OrdemFabrico);
+
+                                var querySelect = $@"SELECT Descricao FROM GPR_OrdemFabricoOutrosCustos 
                                          WHERE IDOrdemFabrico = {IdOrdemFabrico} 
                                          AND Descricao = 'Encargo de 30% sobre materiais'";
-                            var resultadoSelect = BSO.Consulta(querySelect);
-                            if (resultadoSelect == null || resultadoSelect.NumLinhas() == 0)
-                            {
-                                string custoFormatado = CustoTotalComAcrescimo.ToString().Replace(",", ".");
+                                var resultadoSelect = BSO.Consulta(querySelect);
+                                if (resultadoSelect == null || resultadoSelect.NumLinhas() == 0)
+                                {
+                                    string custoFormatado = CustoTotalComAcrescimo.ToString().Replace(",", ".");
 
-                                string dataFormatada = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                                    string dataFormatada = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
 
-                                var queryUpdate = $@"UPDATE GPR_OrdemFabrico
+                                    var queryUpdate = $@"UPDATE GPR_OrdemFabrico
                                              SET CDU_Valorizado = 1
                                              WHERE IDOrdemFabrico = {IdOrdemFabrico}";
-                                var queryInsert = $@"INSERT INTO GPR_OrdemFabricoOutrosCustos 
+                                    var queryInsert = $@"INSERT INTO GPR_OrdemFabricoOutrosCustos 
                                              (Custo, Data, Descricao, IDOrdemFabrico)
                                              VALUES 
                                              ('{custoFormatado}', '{dataFormatada}', 'Encargo de 30% sobre materiais', {IdOrdemFabrico});";
 
-                                BSO.DSO.ExecuteSQL(queryInsert);
-                                BSO.DSO.ExecuteSQL(queryUpdate);
+                                    BSO.DSO.ExecuteSQL(queryInsert);
+                                    BSO.DSO.ExecuteSQL(queryUpdate);
 
-                                var aviso = string.Empty;
-                                var ordensFabrico = new OrderedDictionary
-                        {
-                            { Guid.NewGuid().ToString(), IdOrdemFabrico }
-                        };
-                                BSO.Producao.OrdensFabrico.ProcessaValorizacao(ordensFabrico, true, ref aviso);
-                            
-                                if (string.Equals(aviso?.Trim(), OrdemFabrico?.Trim(), StringComparison.OrdinalIgnoreCase))
-                                {
-                                    if (!string.IsNullOrWhiteSpace(aviso))
+                                    var aviso = string.Empty;
+                                    var ordensFabrico = new OrderedDictionary
                                     {
-                                        //MessageBox.Show("A Ordem de Fabrico não foi valorizada por estar bloqueada para edição ou não estar no estado correto:\r\n" + aviso, "Erro na Valorização", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                        DesvalorizaEOF(IdOrdemFabrico);
-                                        //return;
-                                    }
-                                }
-                                else
-                                {
-                                   
-                                }
+                                        { Guid.NewGuid().ToString(), IdOrdemFabrico }
+                                    };
+                                    BSO.Producao.OrdensFabrico.ProcessaValorizacao(ordensFabrico, true, ref aviso);
 
-                                
+                                    if (string.Equals(aviso?.Trim(), OrdemFabrico?.Trim(), StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        if (!string.IsNullOrWhiteSpace(aviso))
+                                        {
+                                            //MessageBox.Show("A Ordem de Fabrico não foi valorizada por estar bloqueada para edição ou não estar no estado correto:\r\n" + aviso, "Erro na Valorização", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                            DesvalorizaEOF(IdOrdemFabrico);
+                                            //return;
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                    }
+
+
+                                }
                             }
                         }
-                    }
-                    catch (Exception linhaEx)
-                    {
-                        MessageBox.Show($"Erro ao editar linha {j} do documento {tipoDoc} {numDoc}/{serie}: {linhaEx.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        catch (Exception linhaEx)
+                        {
+                            MessageBox.Show($"Erro ao editar linha {j} do documento {tipoDoc} {numDoc}/{serie}: {linhaEx.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                 }
             }
@@ -207,47 +281,61 @@ namespace ADSucoremaExtensibilidade
                 var numLinhas = lista.NumLinhas();
                 if (numLinhas == 0)
                 {
+                    var deleteQuery = $@"
+                        DELETE FROM GPR_OrdemFabricoOutrosCustos
+                         WHERE IDOrdemFabrico = {iDOrdemFabrico}
+                           AND Descricao = 'Encargo de 30% sobre materiais'
+                    ";
+                    BSO.DSO.ExecuteSQL(deleteQuery);
 
-                    return;
+                    var updateQuery = $@"
+                        UPDATE GPR_OrdemFabrico
+                           SET CDU_Valorizado = 0
+                         WHERE IDOrdemFabrico = {iDOrdemFabrico}
+                    ";
+                    BSO.DSO.ExecuteSQL(updateQuery);
+                    //return;
                 }
-
-                lista.Inicio();
-                for (int i = 0; i < numLinhas; i++)
+                else
                 {
-                    try
+                    lista.Inicio();
+                    for (int i = 0; i < numLinhas; i++)
                     {
-                        var tipoDoc = lista.DaValor<string>("TipoDoc");
-                        var numDoc = lista.DaValor<int>("NumDoc");
-                        var serie = lista.DaValor<string>("Serie");
-                        var filial = lista.DaValor<string>("Filial");
-                        var idOrdemFabrico = lista.DaValor<int>("IdOrdemFabrico");
+                        try
+                        {
+                            var tipoDoc = lista.DaValor<string>("TipoDoc");
+                            var numDoc = lista.DaValor<int>("NumDoc");
+                            var serie = lista.DaValor<string>("Serie");
+                            var filial = lista.DaValor<string>("Filial");
+                            var idOrdemFabrico = lista.DaValor<int>("IdOrdemFabrico");
 
-                        // 1) Eliminar o registo na GPR_OrdemFabricoOutrosCustos
-                        var deleteQuery = $@"
-                    DELETE FROM GPR_OrdemFabricoOutrosCustos
-                     WHERE IDOrdemFabrico = {idOrdemFabrico}
-                       AND Descricao = 'Encargo de 30% sobre materiais'
-                ";
-                        BSO.DSO.ExecuteSQL(deleteQuery);
+                            // 1) Eliminar o registo na GPR_OrdemFabricoOutrosCustos
+                            var deleteQuery = $@"
+                        DELETE FROM GPR_OrdemFabricoOutrosCustos
+                         WHERE IDOrdemFabrico = {idOrdemFabrico}
+                           AND Descricao = 'Encargo de 30% sobre materiais'
+                    ";
+                            BSO.DSO.ExecuteSQL(deleteQuery);
 
-                        // 2) Voltar a marcar a Ordem de Fabrico como não valorizada
-                        var updateQuery = $@"
-                    UPDATE GPR_OrdemFabrico
-                       SET CDU_Valorizado = 0
-                     WHERE IDOrdemFabrico = {idOrdemFabrico}
-                ";
-                        BSO.DSO.ExecuteSQL(updateQuery);
+                            // 2) Voltar a marcar a Ordem de Fabrico como não valorizada
+                            var updateQuery = $@"
+                        UPDATE GPR_OrdemFabrico
+                           SET CDU_Valorizado = 0
+                         WHERE IDOrdemFabrico = {idOrdemFabrico}
+                    ";
+                            BSO.DSO.ExecuteSQL(updateQuery);
 
+                        }
+                        catch (Exception innerEx)
+                        {
+                            MessageBox.Show($"Ocorreu um erro ao tentar desvalorizar a Ordem de Fabrico: {innerEx.Message}",
+                                            "Erro",
+                                            MessageBoxButtons.OK,
+                                            MessageBoxIcon.Error);
+                        }
+
+                        lista.Seguinte();
                     }
-                    catch (Exception innerEx)
-                    {
-                        MessageBox.Show($"Ocorreu um erro ao tentar desvalorizar a Ordem de Fabrico: {innerEx.Message}",
-                                        "Erro",
-                                        MessageBoxButtons.OK,
-                                        MessageBoxIcon.Error);
-                    }
-
-                    lista.Seguinte();
                 }
             }
             catch (Exception ex)
