@@ -1,7 +1,10 @@
 using CmpBE100;
+using IntBE100;
+using InvBE100;
 using Primavera.Extensibility.BusinessEntities.ExtensibilityService.EventArgs;
 using Primavera.Extensibility.Production.Editors;
 using System;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 
@@ -60,6 +63,77 @@ namespace ADSucoremaExtensibilidade
                     MessageBox.Show("Lotes das OFs criadas com sucesso.");
                 }
             }
+
+        }
+        public override void AntesDeGravarDocumentoTransferencia(ref InvBEDocumentoTransf DocumentoTransferencia, ref bool Cancel, ExtensibilityEventArgs e)
+        {
+            var num = DocumentoTransferencia.LinhasOrigem.NumItens;
+
+            if (num == 0)
+            {
+                return;
+            }
+            var linhas = new IntBELinhasDocumentoInterno();
+            for (int i = 1; i < num + 1; i++)
+            {
+                var artigo = DocumentoTransferencia.LinhasOrigem.GetEdita(i).Artigo;
+                var quantidades = DocumentoTransferencia.LinhasOrigem.GetEdita(i).Quantidade;
+                string lote = DocumentoTransferencia.LinhasOrigem.GetEdita(i).Lote.ToString();
+
+                if (string.IsNullOrWhiteSpace(artigo))
+                {
+                    continue;
+                }
+                var artigoSQL = BSO.Base.Artigos.Edita(artigo);
+
+                var linha = new IntBELinhaDocumentoInterno
+                {
+                    Descricao = artigoSQL.Descricao,
+                    Armazem = "A1",
+                    Artigo = artigo,
+                    Lote = lote,
+                    Quantidade = Convert.ToDouble(quantidades),
+                    CodigoIva = "23",
+                    TaxaIva = 23,
+                    Unidade = artigoSQL.UnidadeBase,
+                    TipoLinha = "13",
+                    PercIncidenciaIVA = 100,
+                    DataEntrega = DateTime.Now,
+                    ContabilizaTotais = true,
+                    PercIvaDedutivel = 100,
+                    MovStock = "S",
+                    INV_EstadoDestino = "DISP"
+                };
+                linhas.Add(linha);
+
+
+            }
+          
+            var documentoInterno = new IntBEDocumentoInterno
+            {
+                Tipodoc = "ES",
+                Data = DateTime.Now,
+                DataVencimento = DateTime.Now.AddDays(30),
+                Filial = "000",
+                Linhas = linhas,
+                Serie = "2025",
+                Moeda = BSO.Contexto.MoedaBase,
+                Cambio = 1,
+                CambioMBase = 1,
+                CambioMAlt = 1,
+            };
+            try
+            {
+                var doc = BSO.Internos.Documentos.PreencheDadosRelacionados(documentoInterno);
+                BSO.Internos.Documentos.Actualiza(doc);
+            }
+            catch (Exception ex)
+            {
+                PSO.MensagensDialogos.MostraErro("Erro ao criar o documento interno: " + ex.Message, StdBE100.StdBETipos.IconId.PRI_Critico);
+                return;
+            }
+
+
         }
 
 

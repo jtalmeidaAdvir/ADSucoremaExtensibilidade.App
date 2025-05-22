@@ -135,6 +135,9 @@
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\IntBE100.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="InvBE100">
+      <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\InvBE100.dll</HintPath>
+    </Reference>
     <Reference Include="IVndBS100">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\IVndBS100.dll</HintPath>
     </Reference>

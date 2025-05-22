@@ -69,6 +69,9 @@ namespace ADSucoremaExtensibilidade
                
 
             }
+
+    
+
         }
 
         private void DesvalorizaEOF(int iDOrdemFabrico)

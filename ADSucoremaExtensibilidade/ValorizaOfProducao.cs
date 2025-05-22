@@ -1,15 +1,10 @@
 
 using IntBE100;
-using Primavera.Extensibility.BusinessEntities;
 using Primavera.Extensibility.BusinessEntities.ExtensibilityService.EventArgs;
 using Primavera.Extensibility.Production.Editors;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
