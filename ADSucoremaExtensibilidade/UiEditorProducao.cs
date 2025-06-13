@@ -73,6 +73,7 @@ namespace ADSucoremaExtensibilidade
             {
                 return;
             }
+
             var linhas = new IntBELinhasDocumentoInterno();
             for (int i = 1; i < num + 1; i++)
             {

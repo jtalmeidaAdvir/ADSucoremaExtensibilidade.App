@@ -39,11 +39,20 @@ namespace ADSucoremaExtensibilidade
         
         public override void DepoisDeGravar(ExtensibilityEventArgs e)
         {
-            if (valoriza) {
-
+           
+            if (valoriza) 
+            {
+                // CalculoQuantidadesParciais(IdOrdemFabrico);
+             
                 ValorizaEOF(IdOrdemFabrico);
                 valoriza = false;
             }
+        }
+
+        private void CalculoQuantidadesParciais(string idOrdemFabrico)
+        {
+
+            
         }
 
         public void ValorizaEOF(string Of)
@@ -121,8 +130,12 @@ namespace ADSucoremaExtensibilidade
                     BSO.Producao.OrdensFabrico.ProcessaValorizacao(ordensFabrico, true, ref aviso);
 
 
-                   
-                        if (!string.IsNullOrWhiteSpace(aviso))
+
+
+
+
+
+                    if (!string.IsNullOrWhiteSpace(aviso))
                         {
                            
                             //MessageBox.Show("A Ordem de Fabrico não foi valorizada por estar bloqueada para edição ou não estar no estado correto:\r\n" + aviso, "Erro na Valorização", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -212,6 +225,65 @@ namespace ADSucoremaExtensibilidade
                                         { Guid.NewGuid().ToString(), IdOrdemFabrico }
                                     };
                                     BSO.Producao.OrdensFabrico.ProcessaValorizacao(ordensFabrico, true, ref aviso);
+
+                                    //
+                                    var queryof = $"   SELECT OrdemFabrico fROM GPR_OrdemFabrico WHERE IDOrdemFabrico = '{Of}' ";
+
+                                    var ofSQL = BSO.Consulta(queryof);
+                                    var of = BSO.Producao.OrdensFabrico.Edita(ofSQL.DaValor<string>("OrdemFabrico"));
+                
+                                    try
+                                    {
+                                        if (of.QtFabricada != of.QtOrdemFabrico)
+                                        {
+                                           // MessageBox.Show($"A Ordem de Fabrico {Of} não está totalmente fabricada. Não é possível valorizar.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                            var queryEOF = $"SELECT * FROM CabecInternos WHERE tipoDoc = 'EOF' AND IdOrdemFabrico = '{Of}'";
+
+
+                                            var totaQuery = $"SELECT CustoMateriaisReal + CustoSubprodutosReal+CustoTransformacaoReal+OutrosCustosReal AS totalOF FROM GPR_OrdemFabrico WHERe IdOrdemFabrico = '{Of}'";
+                                            var ValorTotaldaOFValorizada = BSO.Consulta(totaQuery).DaValor<double>("totalOF");
+                                            var SQLList = BSO.Consulta(queryEOF);
+
+
+                                            var numlinhasSQL = SQLList.NumLinhas();
+                                            if (numlinhasSQL > 0)
+                                            {
+                                              
+                                                SQLList.Inicio();
+                                                for (int i = 0; i < numlinhasSQL; i++)
+                                                {
+                                                    var tipodoc = SQLList.DaValor<string>("TipoDoc");
+                                                    var numdoc = SQLList.DaValor<int>("NumDoc");
+                                                    var seriesql = SQLList.DaValor<string>("Serie");
+
+                                                    var docEOF = BSO.Internos.Documentos.Edita(tipodoc, numdoc, seriesql, "000");
+                         
+                                                    var linhassql = docEOF.Linhas.NumItens;
+                                        
+                                                    for (int k = 1; k < linhassql + 1; k++)
+                                                    {
+                                                        var linhaSQL = docEOF.Linhas.GetEdita(k);
+                                                
+                                                        if (!string.IsNullOrEmpty(linhaSQL.Artigo))
+                                                        {
+                                                            var quantidade = linhaSQL.Quantidade;
+                                                            var result = (ValorTotaldaOFValorizada * quantidade) / of.QtOrdemFabrico;
+                                                            linhaSQL.PrecUnit = result;
+                                                        }
+
+                                                    }
+                                                    BSO.Internos.Documentos.Actualiza(docEOF);
+                                                    SQLList.Seguinte();
+                                                }
+                                            }
+
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        MessageBox.Show($"Erro ao atualizar a Ordem de Fabrico: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    }
+
 
                                     if (string.Equals(aviso?.Trim(), OrdemFabrico?.Trim(), StringComparison.OrdinalIgnoreCase))
                                     {

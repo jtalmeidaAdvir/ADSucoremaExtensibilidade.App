@@ -503,7 +503,23 @@ namespace ADSucoremaExtensibilidade.Purchases
             }
         }
 
+        //-----------------------------------------------------------------------------------------------------------//
 
-        
+        public override void ValidaLinha(int NumLinha, ExtensibilityEventArgs e)
+        {
+            if(this.DocumentoCompra.Tipodoc == "VFS") 
+            {
+                double QuantidadeReal = (double)this.DocumentoCompra.Linhas.GetEdita(NumLinha).CamposUtil["CDU_QtdReal"].Valor;
+                double PrecuUnitReal = (double)this.DocumentoCompra.Linhas.GetEdita(NumLinha).CamposUtil["CDU_PruReal"].Valor;
+                double quantidade = this.DocumentoCompra.Linhas.GetEdita(NumLinha).Quantidade;
+
+                var precUnit = (PrecuUnitReal * QuantidadeReal) / quantidade;
+
+                this.DocumentoCompra.Linhas.GetEdita(NumLinha).PrecUnit = precUnit;
+            }
+
+
+        }
+
     }
 }
