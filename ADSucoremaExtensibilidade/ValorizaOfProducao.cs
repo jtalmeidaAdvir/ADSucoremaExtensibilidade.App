@@ -71,10 +71,30 @@ namespace ADSucoremaExtensibilidade
                 {
 
                     //coloca so a descricao Encargo de 30% sobre materiais
-                    var oFSEOF = $@"SELECT ROUND(ISNULL(CustoMateriaisReal, 0) * 0.3, 2) AS Acrescimo30PorCento
-                          FROM GPR_OrdemFabrico
-                          WHERE IdOrdemFabrico = '{Of}' AND ISNULL(CustoMateriaisReal, 0) <> 0;";
-
+                    var oFSEOF = $@"SELECT 
+    ROUND(
+        SUM(CAST(LI.PrecUnit AS DECIMAL(18,4)) * CAST(LI.Quantidade AS DECIMAL(18,4))) * 0.3
+    , 2) AS Acrescimo30PorCento
+FROM 
+    CabecInternos AS CI
+INNER JOIN 
+    LinhasInternos AS LI ON CI.ID = LI.IdCabecInternos
+LEFT JOIN 
+    GPR_OrdemFabrico AS OFs ON OFs.OrdemFabrico = LI.Lote
+OUTER APPLY 
+    (
+        SELECT TOP 1 IDCentroTrabalho
+        FROM GPR_OrdemFabricoOperacoes
+        WHERE IDOrdemFabrico = OFs.IDOrdemFabrico
+        ORDER BY Operacao DESC
+    ) AS OFO
+LEFT JOIN 
+    GPR_CentrosTrabalho AS CT ON CT.IDCentroTrabalho = OFO.IDCentroTrabalho
+WHERE 
+    CI.TipoDoc = 'SOF' 
+    AND CI.IdOrdemFabrico = '{Of}'
+    AND (CT.CentroTrabalho IS NULL OR CT.CentroTrabalho != 'MON');";
+         
                     var sqlOfSEOF = BSO.Consulta(oFSEOF);
 
                  
@@ -159,9 +179,29 @@ namespace ADSucoremaExtensibilidade
                     var OrdemFabrico = lista.DaValor<string>("OrdemFabrico");
                     var IdOrdemFabrico = lista.DaValor<int>("IdOrdemFabrico");
 
-                    var ordemSQL = $@"SELECT ROUND(ISNULL(CustoMateriaisReal, 0) * 0.3, 2) AS Acrescimo30PorCento
-                          FROM GPR_OrdemFabrico
-                          WHERE IDOrdemFabrico = '{IdOrdemFabrico}' AND ISNULL(CustoMateriaisReal, 0) <> 0;";
+                    var ordemSQL = $@"SELECT 
+    ROUND(
+        SUM(CAST(LI.PrecUnit AS DECIMAL(18,4)) * CAST(LI.Quantidade AS DECIMAL(18,4))) * 0.3
+    , 2) AS Acrescimo30PorCento
+FROM 
+    CabecInternos AS CI
+INNER JOIN 
+    LinhasInternos AS LI ON CI.ID = LI.IdCabecInternos
+LEFT JOIN 
+    GPR_OrdemFabrico AS OFs ON OFs.OrdemFabrico = LI.Lote
+OUTER APPLY 
+    (
+        SELECT TOP 1 IDCentroTrabalho
+        FROM GPR_OrdemFabricoOperacoes
+        WHERE IDOrdemFabrico = OFs.IDOrdemFabrico
+        ORDER BY Operacao DESC
+    ) AS OFO
+LEFT JOIN 
+    GPR_CentrosTrabalho AS CT ON CT.IDCentroTrabalho = OFO.IDCentroTrabalho
+WHERE 
+    CI.TipoDoc = 'SOF' 
+    AND CI.IdOrdemFabrico = '{IdOrdemFabrico}'
+    AND (CT.CentroTrabalho IS NULL OR CT.CentroTrabalho != 'MON');";
                     var ordem = BSO.Consulta(ordemSQL);
                     if (ordem == null || ordem.NumLinhas() == 0)
                     {
@@ -315,10 +355,6 @@ namespace ADSucoremaExtensibilidade
                 MessageBox.Show($"Erro geral na valorização da Ordem de Fabrico:\n{ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-
-
-
 
         private void DesvalorizaEOF(int iDOrdemFabrico)
         {

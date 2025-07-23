@@ -64,6 +64,8 @@ namespace ADSucoremaExtensibilidade
                 }
             }
 
+            
+
         }
         public override void AntesDeGravarDocumentoTransferencia(ref InvBEDocumentoTransf DocumentoTransferencia, ref bool Cancel, ExtensibilityEventArgs e)
         {
@@ -135,6 +137,11 @@ namespace ADSucoremaExtensibilidade
             }
 
 
+        }
+
+        public override void AntesDeGravarDocumentoAcompanhamentoDeBensEmCirculacao(CmpBEDocumentoCompra DocumentoAcompanhamentoBensEmCirculacao, ref bool Cancel, ExtensibilityEventArgs e)
+        {
+     
         }
 
 

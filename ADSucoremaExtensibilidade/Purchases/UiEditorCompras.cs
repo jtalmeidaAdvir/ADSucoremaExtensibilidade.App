@@ -1,12 +1,13 @@
 using Primavera.Extensibility.BusinessEntities.ExtensibilityService.EventArgs;
 using Primavera.Extensibility.Purchases.Editors;
 using StdBE100;
+using StdPlatBS100;
 using System;
 using System.Windows.Forms;
 using static BasBE100.BasBETiposGcp;
 using static StdPlatBS100.StdBSTipos;
 using static System.Windows.Forms.LinkLabel;
-
+using StdPlatBS100;
 namespace ADSucoremaExtensibilidade.Purchases
 {
     public class UiEditorCompras : EditorCompras
@@ -66,6 +67,43 @@ namespace ADSucoremaExtensibilidade.Purchases
                     MessageBox.Show("Ocorreu um erro ao calcular o peso total: " + ex.Message);
                 }
             }
+
+
+            if (KeyCode == Convert.ToInt32(Keys.A))
+            {
+                MessageBox.Show("A tecla 'A' foi pressionada. Esta funcionalidade ainda não está implementada.");
+                if (this.DocumentoCompra.Tipodoc == "VFS")
+                {
+                    int totalLinhas = this.DocumentoCompra.Linhas.NumItens;
+
+                    for (int i = 1; i <= totalLinhas; i++)
+                    {
+                        var linha = this.DocumentoCompra.Linhas.GetEdita(i);
+
+                        if (linha.Artigo != null)
+                        {
+                            var campoQtdReal = linha.CamposUtil["CDU_QtdReal"];
+                            var campoPruReal = linha.CamposUtil["CDU_PruReal"];
+
+                            if (campoQtdReal?.Valor != null && campoPruReal?.Valor != null)
+                            {
+                                double quantidadeReal = (double)campoQtdReal.Valor;
+                                double precoUnitReal = (double)campoPruReal.Valor;
+                                double quantidade = linha.Quantidade;
+
+                                if (quantidade != 0)
+                                {
+                                    linha.PrecUnit = (precoUnitReal * quantidadeReal) / quantidade;
+                                }
+                            }
+                        }
+                    }
+                    PSO.MensagensDialogos.MostraMensagem(TipoMsg.PRI_Detalhe, "Preços unitários atualizados com sucesso!");
+                }
+
+                e.Handled = true;
+            }
+
         }
 
 
@@ -320,7 +358,57 @@ namespace ADSucoremaExtensibilidade.Purchases
 
                 base.AntesDeGravar(ref Cancel, e);
             }
+
+           /*if (this.DocumentoCompra.Tipodoc == "VFS")
+            {
+                bool precosVaziosEncontrados = false;
+
+                for (int i = 1; i <= this.DocumentoCompra.Linhas.NumItens; i++)
+                {
+                    var linha = this.DocumentoCompra.Linhas.GetEdita(i);
+                    if (linha != null && linha.PrecUnit == 0)
+                    {
+                        precosVaziosEncontrados = true;
+                        break;
+                    }
+                }
+
+                if (precosVaziosEncontrados)
+                {
+                    // Mensagem informando que é obrigatório atualizar
+                    MessageBox.Show(
+                        "Existem linhas com Preço Unitário vazio.\n" +
+                        "É obrigatório atualizar os preços antes de gravar.\n" +
+                        "Clique em OK para atualizar os preços.",
+                        "Preço Unitário Vazio - Atualização Obrigatória",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning
+                    );
+
+                    // Atualiza os preços de todas as linhas com preço zero
+                    for (int i = 1; i <= this.DocumentoCompra.Linhas.NumItens; i++)
+                    {
+                        var linha = this.DocumentoCompra.Linhas.GetEdita(i);
+                        if (linha != null && linha.PrecUnit == 0)
+                        {
+                            double quantidadeReal = Convert.ToDouble(linha.CamposUtil["CDU_QtdReal"].Valor);
+                            double precoUnitReal = Convert.ToDouble(linha.CamposUtil["CDU_PruReal"].Valor);
+                            double quantidade = linha.Quantidade;
+
+                            if (quantidade != 0)
+                            {
+                                linha.PrecUnit = (precoUnitReal * quantidadeReal) / quantidade;
+                            }
+                        }
+                    }
+
+                    // Agora que atualizou os preços, deixa gravar
+                    Cancel = false; // garantia que não cancela
+                }
+            }*/
+
         }
+
 
         // Função para definir preço como zero após confirmação do usuário
         private void DefinirPrecoComoZeroNaConfirmacao()
@@ -505,21 +593,32 @@ namespace ADSucoremaExtensibilidade.Purchases
 
         //-----------------------------------------------------------------------------------------------------------//
 
+        
         public override void ValidaLinha(int NumLinha, ExtensibilityEventArgs e)
         {
-            if(this.DocumentoCompra.Tipodoc == "VFS") 
+            if (this.DocumentoCompra.Tipodoc == "VFS")
             {
-                double QuantidadeReal = (double)this.DocumentoCompra.Linhas.GetEdita(NumLinha).CamposUtil["CDU_QtdReal"].Valor;
-                double PrecuUnitReal = (double)this.DocumentoCompra.Linhas.GetEdita(NumLinha).CamposUtil["CDU_PruReal"].Valor;
-                double quantidade = this.DocumentoCompra.Linhas.GetEdita(NumLinha).Quantidade;
+                var linha = this.DocumentoCompra.Linhas.GetEdita(NumLinha);
+                if (linha != null && linha.Artigo != null)
+                {
+                    var qtdRealObj = linha.CamposUtil["CDU_QtdReal"]?.Valor;
+                    var pruRealObj = linha.CamposUtil["CDU_PruReal"]?.Valor;
 
-                var precUnit = (PrecuUnitReal * QuantidadeReal) / quantidade;
+                    if (qtdRealObj != null && pruRealObj != null)
+                    {
+                        double quantidadeReal = (double)qtdRealObj;
+                        double precoUnitReal = (double)pruRealObj;
+                        double quantidade = linha.Quantidade;
 
-                this.DocumentoCompra.Linhas.GetEdita(NumLinha).PrecUnit = precUnit;
+                        if (quantidade != 0)
+                        {
+                            linha.PrecUnit = (precoUnitReal * quantidadeReal) / quantidade;
+                        }
+                    }
+                }
             }
-
-
         }
+
 
     }
 }
