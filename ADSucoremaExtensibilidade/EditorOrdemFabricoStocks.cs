@@ -267,6 +267,7 @@ namespace ADSucoremaExtensibilidade
         private void button1_Click(object sender, System.EventArgs e)
         {
             List<DataRow> linhasSelecionadas = new List<DataRow>();
+            List<string> artigosJaExistentes = new List<string>();
             var documento = BSO.Internos.Documentos.Edita(this.DocumentoStock.Tipodoc, this.DocumentoStock.NumDoc, this.DocumentoStock.Serie, this.DocumentoStock.Filial);
 
             foreach (DataGridViewRow row in dgvOrdensFabrico.Rows)
@@ -274,8 +275,26 @@ namespace ADSucoremaExtensibilidade
                 if (Convert.ToBoolean(row.Cells["Selecionado"].Value))
                 {
                     DataRow dataRow = ((DataRowView)row.DataBoundItem).Row;
-                    linhasSelecionadas.Add(dataRow);
                     var artigo = dataRow["Artigo"].ToString();
+
+                    // Verificar se o artigo já existe no SOF
+                    var queryVerificacao = $@"SELECT COUNT(*) AS count
+                                           FROM CabecInternos CI
+                                           JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
+                                           WHERE CI.TipoDoc = 'SOF' 
+                                             AND CI.IdOrdemFabrico = '{this.DocumentoStock.IdOrdemFabrico}'
+                                             AND LI.Artigo = '{artigo}';";
+
+                    var resultadoVerificacao = BSO.Consulta(queryVerificacao);
+                    resultadoVerificacao.Inicio();
+
+                    if (resultadoVerificacao.DaValor<int>("count") > 0)
+                    {
+                        artigosJaExistentes.Add(artigo);
+                        continue; // Pula este artigo e não o adiciona
+                    }
+
+                    linhasSelecionadas.Add(dataRow);
                     var lote = dataRow["OrdemFabrico"].ToString();
                     var uni = dataRow["Unidade"].ToString();
 
@@ -337,18 +356,34 @@ namespace ADSucoremaExtensibilidade
                 }
             }
 
+            string mensagem = "";
             if (linhasSelecionadas.Count > 0)
             {
                 var error = "";
                 BSO.Internos.Documentos.ValidaActualizacao(documento, ref error);
                 BSO.Internos.Documentos.Actualiza(documento);
-                MessageBox.Show($"{linhasSelecionadas.Count} linhas adicionadas ao SOF.");
-            }
-            else
-            {
-                MessageBox.Show("Nenhuma linha foi selecionada.");
+                mensagem = $"{linhasSelecionadas.Count} linhas adicionadas ao SOF.";
             }
 
+            if (artigosJaExistentes.Count > 0)
+            {
+                string artigosIgnorados = string.Join(", ", artigosJaExistentes);
+                if (!string.IsNullOrEmpty(mensagem))
+                {
+                    mensagem += $"\n\nArtigos já existentes no SOF (ignorados): {artigosIgnorados}";
+                }
+                else
+                {
+                    mensagem = $"Os seguintes artigos já existem no SOF e foram ignorados: {artigosIgnorados}";
+                }
+            }
+
+            if (linhasSelecionadas.Count == 0 && artigosJaExistentes.Count == 0)
+            {
+                mensagem = "Nenhuma linha foi selecionada.";
+            }
+
+            MessageBox.Show(mensagem);
             this.Close();
         }
 
