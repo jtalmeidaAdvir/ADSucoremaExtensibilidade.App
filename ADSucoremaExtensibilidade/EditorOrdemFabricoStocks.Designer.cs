@@ -32,6 +32,7 @@
             this.dgvOrdensFabrico = new System.Windows.Forms.DataGridView();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+            this.BT_CarregarEletrica = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrdensFabrico)).BeginInit();
             this.SuspendLayout();
             // 
@@ -70,11 +71,23 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
+            // BT_CarregarEletrica
+            // 
+            this.BT_CarregarEletrica.BackColor = System.Drawing.Color.PaleGoldenrod;
+            this.BT_CarregarEletrica.Location = new System.Drawing.Point(668, 11);
+            this.BT_CarregarEletrica.Name = "BT_CarregarEletrica";
+            this.BT_CarregarEletrica.Size = new System.Drawing.Size(120, 30);
+            this.BT_CarregarEletrica.TabIndex = 3;
+            this.BT_CarregarEletrica.Text = "C. Elétricos";
+            this.BT_CarregarEletrica.UseVisualStyleBackColor = false;
+            this.BT_CarregarEletrica.Click += new System.EventHandler(this.BT_CarregarEletrica_Click);
+            // 
             // EditorOrdemFabricoStocks
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 444);
+            this.Controls.Add(this.BT_CarregarEletrica);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.dgvOrdensFabrico);
@@ -92,5 +105,6 @@
         private System.Windows.Forms.DataGridView dgvOrdensFabrico;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button BT_CarregarEletrica;
     }
 }

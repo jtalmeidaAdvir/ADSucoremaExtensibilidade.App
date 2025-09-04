@@ -65,7 +65,6 @@ namespace ADSucoremaExtensibilidade
             return ordensComSubcontratacao;
         }
 
-
         private StdBELista GetInfoListaOrdemFabricoProjeto(string projecto)
         {
             var query = $"SELECT IDOrdemFabrico,CDU_CodigoProjeto,* FROM GPR_OrdemFabrico WHERE CDU_CodigoProjeto = '{projecto}'";
@@ -236,8 +235,6 @@ namespace ADSucoremaExtensibilidade
             }
         }
 
-
-
         private void button1_Click(object sender, System.EventArgs e)
         {
             List<DataRow> linhasSelecionadas = new List<DataRow>();
@@ -330,6 +327,11 @@ namespace ADSucoremaExtensibilidade
             {
                 row.Cells["Selecionado"].Value = true;
             }
+        }
+
+        private void BT_CarregarEletrica_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
