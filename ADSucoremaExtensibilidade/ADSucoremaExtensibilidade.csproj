@@ -285,6 +285,12 @@
       <DependentUpon>MenuImpressao.cs</DependentUpon>
     </Compile>
     <Compile Include="Sales\UiEditorVendas.cs" />
+    <Compile Include="SelecionarArtigosEletricos.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelecionarArtigosEletricos.Designer.cs">
+      <DependentUpon>SelecionarArtigosEletricos.cs</DependentUpon>
+    </Compile>
     <Compile Include="UiEditorInternos.cs" />
     <Compile Include="UiEditorProducao.cs" />
     <Compile Include="UiOrdensFabrico.cs" />

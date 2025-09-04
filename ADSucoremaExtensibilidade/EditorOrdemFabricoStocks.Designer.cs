@@ -32,7 +32,8 @@
             this.dgvOrdensFabrico = new System.Windows.Forms.DataGridView();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
-            this.BT_CarregarEletrica = new System.Windows.Forms.Button();
+            this.cbTipoLista = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrdensFabrico)).BeginInit();
             this.SuspendLayout();
             // 
@@ -40,8 +41,8 @@
             // 
             this.dgvOrdensFabrico.AllowUserToAddRows = false;
             this.dgvOrdensFabrico.AllowUserToDeleteRows = false;
-            this.dgvOrdensFabrico.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.dgvOrdensFabrico.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvOrdensFabrico.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvOrdensFabrico.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -71,23 +72,32 @@
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
-            // BT_CarregarEletrica
+            // cbTipoLista
             // 
-            this.BT_CarregarEletrica.BackColor = System.Drawing.Color.PaleGoldenrod;
-            this.BT_CarregarEletrica.Location = new System.Drawing.Point(668, 11);
-            this.BT_CarregarEletrica.Name = "BT_CarregarEletrica";
-            this.BT_CarregarEletrica.Size = new System.Drawing.Size(120, 30);
-            this.BT_CarregarEletrica.TabIndex = 3;
-            this.BT_CarregarEletrica.Text = "C. Elétricos";
-            this.BT_CarregarEletrica.UseVisualStyleBackColor = false;
-            this.BT_CarregarEletrica.Click += new System.EventHandler(this.BT_CarregarEletrica_Click);
+            this.cbTipoLista.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbTipoLista.FormattingEnabled = true;
+            this.cbTipoLista.Location = new System.Drawing.Point(350, 16);
+            this.cbTipoLista.Name = "cbTipoLista";
+            this.cbTipoLista.Size = new System.Drawing.Size(200, 21);
+            this.cbTipoLista.TabIndex = 3;
+            this.cbTipoLista.SelectedIndexChanged += new System.EventHandler(this.cbTipoLista_SelectedIndexChanged);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(280, 19);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(64, 13);
+            this.label1.TabIndex = 4;
+            this.label1.Text = "Tipo de Lista:";
             // 
             // EditorOrdemFabricoStocks
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 444);
-            this.Controls.Add(this.BT_CarregarEletrica);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.cbTipoLista);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.dgvOrdensFabrico);
@@ -105,6 +115,7 @@
         private System.Windows.Forms.DataGridView dgvOrdensFabrico;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button BT_CarregarEletrica;
+        private System.Windows.Forms.ComboBox cbTipoLista;
+        private System.Windows.Forms.Label label1;
     }
 }

@@ -13,31 +13,60 @@ namespace ADSucoremaExtensibilidade
         private ErpBS100.ErpBS BSO;
         private StdPlatBS100.StdBSInterfPub PSO;
         private IntBE100.IntBEDocumentoInterno DocumentoStock;
+        private string projeto;
+
         public EditorOrdemFabricoStocks(ErpBS100.ErpBS bSO, StdPlatBS100.StdBSInterfPub pSO, IntBE100.IntBEDocumentoInterno documentoStock)
         {
             InitializeComponent();
             BSO = bSO;
             PSO = pSO;
             DocumentoStock = documentoStock;
+            ConfigurarComboBox();
             GetValores();
+        }
+
+        private void ConfigurarComboBox()
+        {
+            // Adicionar itens ao ComboBox
+            cbTipoLista.Items.Add("Artigos Subcontratados");
+            cbTipoLista.Items.Add("Artigos Elétricos");
+            cbTipoLista.SelectedIndex = 0; // Selecionar por defeito os artigos subcontratados
         }
 
         private void GetValores()
         {
-
             var ordemFabricoSQL = GetInforOrdemFabrico();
+            projeto = ordemFabricoSQL.DaValor<string>("CDU_CodigoProjeto");
 
-            var projeto = ordemFabricoSQL.DaValor<string>("CDU_CodigoProjeto");
+            CarregarListaSelecionada();
+        }
 
+        private void CarregarListaSelecionada()
+        {
+            if (cbTipoLista.SelectedIndex == 0)
+            {
+                // Carregar artigos subcontratados
+                CarregarArtigosSubcontratados();
+            }
+            else
+            {
+                // Carregar artigos elétricos
+                CarregarArtigosEletricos();
+            }
+        }
 
+        private void CarregarArtigosSubcontratados()
+        {
             var todasOrdemFabricoProjeto = GetInfoListaOrdemFabricoProjeto(projeto);
-
-            //var todasOrdensFabricoSub = GetInfoOrdemFabricoSub(todasOrdemFabricoProjeto);
-
             DataTable todasOrdensFabricoSub = GetInfoOrdemFabricoSubGrid(todasOrdemFabricoProjeto);
-
             dgvOrdensFabrico.DataSource = todasOrdensFabricoSub;
+        }
 
+        private void CarregarArtigosEletricos()
+        {
+            var artigosEletricos = GetArtigosEletricos(projeto);
+            DataTable dtEletricos = ConvertArtigosEletricosToDataTable(artigosEletricos);
+            dgvOrdensFabrico.DataSource = dtEletricos;
         }
 
         private List<StdBELista> GetInfoOrdemFabricoSub(StdBELista todasOrdemFabricoProjeto)
@@ -56,7 +85,7 @@ namespace ADSucoremaExtensibilidade
 
                 if (result.NumLinhas() > 0)
                 {
-                    ordensComSubcontratacao.Add(result); 
+                    ordensComSubcontratacao.Add(result);
                 }
 
                 todasOrdemFabricoProjeto.Seguinte();
@@ -84,13 +113,13 @@ namespace ADSucoremaExtensibilidade
         {
             DataTable dt = new DataTable();
 
-            dt.Columns.Add("Selecionado", typeof(bool)); 
+            dt.Columns.Add("Selecionado", typeof(bool));
             dt.Columns.Add("OrdemFabrico", typeof(string));
             dt.Columns.Add("Artigo", typeof(string));
             dt.Columns.Add("Unidade", typeof(string));
             dt.Columns.Add("QtFabricada", typeof(string));
-            dt.Columns.Add("Liquido", typeof(decimal)); 
-            dt.Columns.Add("Total", typeof(decimal)); 
+            dt.Columns.Add("Liquido", typeof(decimal));
+            dt.Columns.Add("Total", typeof(decimal));
             dt.Columns.Add("Descricao", typeof(string));
             dt.Columns.Add("Projecto", typeof(string));
             dt.Columns.Add("Rececionado", typeof(bool));
@@ -149,7 +178,7 @@ namespace ADSucoremaExtensibilidade
                     var resultvfa = BSO.Consulta(queryUnidade);
 
                     var numlinhas = resultvfa.NumLinhas();
-                    if(numlinhas > 0)
+                    if (numlinhas > 0)
                     {
                         var quantidade = Math.Round(Math.Abs(Convert.ToDouble(resultvfa.DaValor<string>("Quantidade"))), 3);
                         var totalpositivo = Math.Round(Math.Abs(Convert.ToDouble(resultvfa.DaValor<string>("PrecUnit"))), 4);
@@ -239,6 +268,7 @@ namespace ADSucoremaExtensibilidade
         {
             List<DataRow> linhasSelecionadas = new List<DataRow>();
             var documento = BSO.Internos.Documentos.Edita(this.DocumentoStock.Tipodoc, this.DocumentoStock.NumDoc, this.DocumentoStock.Serie, this.DocumentoStock.Filial);
+
             foreach (DataGridViewRow row in dgvOrdensFabrico.Rows)
             {
                 if (Convert.ToBoolean(row.Cells["Selecionado"].Value))
@@ -248,71 +278,77 @@ namespace ADSucoremaExtensibilidade
                     var artigo = dataRow["Artigo"].ToString();
                     var lote = dataRow["OrdemFabrico"].ToString();
                     var uni = dataRow["Unidade"].ToString();
-                    //var qtd = dataRow["QtFabricada"].ToString();
 
                     var Qtf = dataRow["QtFabricada"].ToString();
                     var total = dataRow["Total"].ToString();
                     var qtd = double.Parse(Qtf);
                     var tot = double.Parse(total);
-                    // Converter as variáveis para números
-                    double quantidadeFabricada = 0;
-                    double totalValue = 0;
-                    double qtdi = 0.000;
-                    if (double.TryParse(Qtf, out quantidadeFabricada) && double.TryParse(total, out totalValue))
+
+                    // Calcular preço unitário
+                    double precoUnitario = 0.000;
+                    if (double.TryParse(Qtf, out double quantidadeFabricada) && double.TryParse(total, out double totalValue))
                     {
-                        // Verificar se o total não é zero para evitar divisão por zero
-                        if (totalValue != 0)
+                        if (cbTipoLista.SelectedIndex == 1) // Artigos elétricos
                         {
-                            if (quantidadeFabricada != 0) {
-                                double resultado = totalValue / quantidadeFabricada;
-                                qtdi = resultado;
+                            precoUnitario = totalValue; // Para elétricos, usar o total como preço unitário
+                        }
+                        else // Artigos subcontratados
+                        {
+                            if (totalValue != 0)
+                            {
+                                if (quantidadeFabricada != 0)
+                                {
+                                    precoUnitario = totalValue / quantidadeFabricada;
+                                }
+                                else
+                                {
+                                    precoUnitario = totalValue / 1.000;
+                                }
                             }
                             else
                             {
-                                double resultado = totalValue / 1.000;
-                                qtdi = resultado;
+                                precoUnitario = totalValue / 1.000;
                             }
-                        }
-                        else
-                        {
-                            double resultado = totalValue / 1.000;
-                            qtdi = resultado;
                         }
                     }
                     else
                     {
                         MessageBox.Show("Erro ao converter os valores para números.");
+                        continue;
                     }
-
-
 
                     var infoArtigo = BSO.Base.Artigos.Edita(artigo);
                     var unidade = infoArtigo.UnidadeBase;
                     var descricao = infoArtigo.Descricao;
-                    var armazem = infoArtigo.ArmazemSugestao;
 
                     IntBELinhaDocumentoInterno linha = new IntBELinhaDocumentoInterno()
                     {
                         Artigo = artigo,
-                        Lote = lote,
+                        Lote = !string.IsNullOrEmpty(lote) ? lote : "",
                         Unidade = uni,
                         Descricao = descricao,
                         Armazem = "A1",
                         Quantidade = qtd,
-                        PrecoUnitario = tot,
+                        PrecoUnitario = precoUnitario,
                         INV_EstadoOrigem = "DISP"
-
                     };
 
                     documento.Linhas.Insere(linha);
                 }
             }
-            var error = "";
-            BSO.Internos.Documentos.ValidaActualizacao(documento, ref  error);
-            BSO.Internos.Documentos.Actualiza(documento);
-           
-            // Faça algo com as linhas selecionadas, como exibi-las ou processá-las
-            MessageBox.Show($"{linhasSelecionadas.Count} linhas Adcionadas.");
+
+            if (linhasSelecionadas.Count > 0)
+            {
+                var error = "";
+                BSO.Internos.Documentos.ValidaActualizacao(documento, ref error);
+                BSO.Internos.Documentos.Actualiza(documento);
+                MessageBox.Show($"{linhasSelecionadas.Count} linhas adicionadas ao SOF.");
+            }
+            else
+            {
+                MessageBox.Show("Nenhuma linha foi selecionada.");
+            }
+
             this.Close();
         }
 
@@ -329,9 +365,182 @@ namespace ADSucoremaExtensibilidade
             }
         }
 
-        private void BT_CarregarEletrica_Click(object sender, EventArgs e)
+        private StdBELista GetArtigosEletricos(string codigoProjeto)
         {
+            var query = $@"SELECT 
+                            LC.Artigo,
+                            LC.Descricao,
+                            LC.Lote,
+                            LC.Quantidade,
+                            A.Familia,
+                            CC.NumDoc,
+                            CC.Serie,
+                            CO.Codigo,
+                            OFA.OrdemFabrico,
+                            LC.PrecUnit,
+                            LC.PrecoLiquido
+                        FROM 
+                            CabecCompras AS CC
+                        INNER JOIN 
+                            LinhasCompras AS LC ON CC.Id = LC.IdCabecCompras
+                        INNER JOIN 
+                            Artigo AS A ON LC.Artigo = A.Artigo
+                        INNER JOIN 
+                            COP_Obras AS CO ON LC.ObraID = CO.ID
+                        LEFT JOIN 
+                            GPR_OrdemFabrico AS OFA ON LC.Artigo = OFA.Artigo
+                        WHERE 
+                            CC.TipoDoc = 'VFA'
+                            AND LC.Artigo IS NOT NULL
+                            AND (A.Familia = '004' OR A.Familia = '024')
+                            AND LC.ObraID IS NOT NULL
+                            AND CO.Codigo = '{codigoProjeto}'";
 
+            return BSO.Consulta(query);
+        }
+
+        private void InserirArtigosEletricosNoSOF(StdBELista artigosEletricos)
+        {
+            var documento = BSO.Internos.Documentos.Edita(this.DocumentoStock.Tipodoc, this.DocumentoStock.NumDoc, this.DocumentoStock.Serie, this.DocumentoStock.Filial);
+            int artigosInseridos = 0;
+            var num = artigosEletricos.NumLinhas();
+
+            artigosEletricos.Inicio();
+            for (int i = 0; i < num; i++)
+            {
+                var artigo = artigosEletricos.DaValor<string>("Artigo");
+                var lote = artigosEletricos.DaValor<string>("Lote");
+                var descricao = artigosEletricos.DaValor<string>("Descricao");
+
+                // Verificar se o artigo já existe no documento
+                bool artigoJaExiste = false;
+                for (int y = 1; y <= documento.Linhas.NumItens; y++)
+                {
+                    if (documento.Linhas.GetEdita(y).Artigo == artigo)
+                    {
+                        artigoJaExiste = true;
+                        break;
+                    }
+                }
+
+                if (!artigoJaExiste)
+                {
+                    var quantidade = Math.Abs(Convert.ToDouble(artigosEletricos.DaValor<string>("Quantidade")));
+                    var precoUnitario = Math.Abs(Convert.ToDouble(artigosEletricos.DaValor<string>("PrecUnit")));
+
+                    // Obter informações do artigo
+                    var infoArtigo = BSO.Base.Artigos.Edita(artigo);
+                    var unidade = infoArtigo.UnidadeBase;
+
+                    IntBELinhaDocumentoInterno linha = new IntBELinhaDocumentoInterno()
+                    {
+                        Artigo = artigo,
+                        Lote = !string.IsNullOrEmpty(lote) ? lote : "",
+                        Unidade = unidade,
+                        Descricao = descricao,
+                        Armazem = "A1",
+                        Quantidade = quantidade,
+                        PrecoUnitario = precoUnitario,
+                        INV_EstadoOrigem = "DISP"
+                    };
+
+                    documento.Linhas.Insere(linha);
+                    artigosInseridos++;
+                }
+
+                artigosEletricos.Seguinte();
+            }
+
+            if (artigosInseridos > 0)
+            {
+                var error = "";
+                BSO.Internos.Documentos.ValidaActualizacao(documento, ref error);
+                BSO.Internos.Documentos.Actualiza(documento);
+            }
+        }
+
+        private bool VerificarSeArtigosEletricosJaInseridos(string projeto)
+        {
+            var queryVerificacao = $@"SELECT COUNT(*) AS count
+                                   FROM CabecInternos CI
+                                   JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
+                                   JOIN Artigo A ON LI.Artigo = A.Artigo
+                                   JOIN GPR_OrdemFabrico GF ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
+                                   WHERE CI.TipoDoc = 'SOF' 
+                                     AND GF.CDU_CodigoProjeto = '{projeto}'
+                                     AND (A.Familia = '004' OR A.Familia = '024')";
+
+            var resultado = BSO.Consulta(queryVerificacao);
+            resultado.Inicio();
+
+            return resultado.DaValor<int>("count") > 0;
+        }
+
+        private DataTable ConvertArtigosEletricosToDataTable(StdBELista artigosEletricos)
+        {
+            DataTable dt = new DataTable();
+
+            dt.Columns.Add("Selecionado", typeof(bool));
+            dt.Columns.Add("OrdemFabrico", typeof(string));
+            dt.Columns.Add("Artigo", typeof(string));
+            dt.Columns.Add("Unidade", typeof(string));
+            dt.Columns.Add("QtFabricada", typeof(string));
+            dt.Columns.Add("Liquido", typeof(decimal));
+            dt.Columns.Add("Total", typeof(decimal));
+            dt.Columns.Add("Descricao", typeof(string));
+            dt.Columns.Add("Projecto", typeof(string));
+            dt.Columns.Add("Rececionado", typeof(bool));
+            dt.Columns.Add("SubContratacao", typeof(bool));
+
+            var num = artigosEletricos.NumLinhas();
+            artigosEletricos.Inicio();
+
+            for (int i = 0; i < num; i++)
+            {
+                var artigo = artigosEletricos.DaValor<string>("Artigo");
+                var ordemFabrico = artigosEletricos.DaValor<string>("OrdemFabrico");
+                var descricao = artigosEletricos.DaValor<string>("Descricao");
+                var quantidade = Math.Abs(Convert.ToDouble(artigosEletricos.DaValor<string>("Quantidade")));
+                var precoUnitario = Math.Abs(Convert.ToDouble(artigosEletricos.DaValor<string>("PrecUnit")));
+                var precoLiquido = Math.Abs(Convert.ToDouble(artigosEletricos.DaValor<string>("PrecoLiquido")));
+
+                // Verificar se o artigo já existe no DocumentoStock.Linhas
+                bool existe = false;
+                for (int y = 1; y <= this.DocumentoStock.Linhas.NumItens; y++)
+                {
+                    if (this.DocumentoStock.Linhas.GetEdita(y).Artigo == artigo)
+                    {
+                        existe = true;
+                        break;
+                    }
+                }
+
+                var infoArtigo = BSO.Base.Artigos.Edita(artigo);
+                var unidade = infoArtigo?.UnidadeBase ?? "UN";
+
+                dt.Rows.Add(
+                    false,
+                    ordemFabrico ?? "",
+                    artigo,
+                    unidade,
+                    quantidade,
+                    precoLiquido,
+                    precoUnitario,
+                    descricao,
+                    projeto,
+                    !existe,
+                    false // Artigos elétricos não são subcontratados
+                );
+
+                artigosEletricos.Seguinte();
+            }
+
+            return dt;
+        }
+
+        private void cbTipoLista_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            CarregarListaSelecionada();
         }
     }
 }
