@@ -3,6 +3,7 @@ using System;
 using Primavera.Extensibility.BusinessEntities.ExtensibilityService.EventArgs;
 using StdBE100;
 using System.Windows.Forms;
+using ADSucoremaExtensibilidade;
 
 namespace ExtensibilityPrimaveraJLA
 {
@@ -14,11 +15,24 @@ namespace ExtensibilityPrimaveraJLA
 
         public override void TeclaPressionada(int KeyCode, int Shift, ExtensibilityEventArgs e)
         {
+            // Manter funcionalidade existente para RC
             if (this.DocumentoInterno.Tipodoc == "RC")
             {
                 if (KeyCode == Convert.ToInt32(Keys.K))
                 {
                     OpenProjectForm();
+                }
+            }
+
+            // Adicionar funcionalidade para SOF - Ctrl+Shift+C
+            if (this.DocumentoInterno.Tipodoc == "SOF")
+            {
+                if ((Shift & 3) == 3 && KeyCode == Convert.ToInt32(Keys.C)) // Ctrl+Shift+C
+                {
+                    // Abrir sempre o EditorOrdemFabricoStocks, mesmo sem projeto ou ordem de fabrico
+                    var form = new EditorOrdemFabricoStocks(BSO, PSO, this.DocumentoInterno);
+                    form.ShowDialog();
+                
                 }
             }
         }
@@ -41,7 +55,7 @@ namespace ExtensibilityPrimaveraJLA
                                 inner join CabecCompras c on l.IdCabecCompras=c.Id
                                 inner join COP_Obras O ON l.ObraID=O.ID
                                 where o.Codigo='{project}' and c.TipoDoc='VFA'
-                                AND c.DataDoc between '{startDate.ToString("yyyy-MM-dd")}' and '{endDate.ToString("yyyy-MM-dd")}'" ;
+                                AND c.DataDoc between '{startDate.ToString("yyyy-MM-dd")}' and '{endDate.ToString("yyyy-MM-dd")}'";
 
             StdBELista lst = BSO.Consulta(strSQL);
             if (lst.NumLinhas() > 0)
@@ -55,11 +69,11 @@ namespace ExtensibilityPrimaveraJLA
                     double precunit = Math.Abs(Convert.ToDouble(lst.Valor("PrecUnit")));
 
 
-                    BSO.Internos.Documentos.AdicionaLinha(this.DocumentoInterno,artigo,"","","",precunit,desc,qtd);
+                    BSO.Internos.Documentos.AdicionaLinha(this.DocumentoInterno, artigo, "", "", "", precunit, desc, qtd);
                     int numItems = this.DocumentoInterno.Linhas.NumItens;
                     this.DocumentoInterno.Linhas.GetEdita(numItems).ObraID = obraID;
-                    
-                    
+
+
 
                     lst.Seguinte();
                 }

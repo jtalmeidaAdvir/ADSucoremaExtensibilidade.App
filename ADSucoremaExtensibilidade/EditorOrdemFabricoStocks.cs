@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
+using System.IO;
+using Microsoft.Office.Interop.Excel;
+using System.Runtime.InteropServices;
 
 namespace ADSucoremaExtensibilidade
 {
@@ -36,13 +39,30 @@ namespace ADSucoremaExtensibilidade
         private void GetValores()
         {
             var ordemFabricoSQL = GetInforOrdemFabrico();
-            projeto = ordemFabricoSQL.DaValor<string>("CDU_CodigoProjeto");
+
+            // Verificar se existe resultado e se tem projeto
+            if (ordemFabricoSQL != null && ordemFabricoSQL.NumLinhas() > 0)
+            {
+                projeto = ordemFabricoSQL.DaValor<string>("CDU_CodigoProjeto");
+            }
+            else
+            {
+                projeto = "";
+            }
 
             CarregarListaSelecionada();
         }
 
         private void CarregarListaSelecionada()
         {
+            // Se não há projeto definido, mostrar grid vazio
+            if (string.IsNullOrEmpty(projeto))
+            {
+                System.Data.DataTable dtVazio = CriarDataTableVazio();
+                dgvOrdensFabrico.DataSource = dtVazio;
+                return;
+            }
+
             if (cbTipoLista.SelectedIndex == 0)
             {
                 // Carregar artigos subcontratados
@@ -58,14 +78,14 @@ namespace ADSucoremaExtensibilidade
         private void CarregarArtigosSubcontratados()
         {
             var todasOrdemFabricoProjeto = GetInfoListaOrdemFabricoProjeto(projeto);
-            DataTable todasOrdensFabricoSub = GetInfoOrdemFabricoSubGrid(todasOrdemFabricoProjeto);
+            System.Data.DataTable todasOrdensFabricoSub = GetInfoOrdemFabricoSubGrid(todasOrdemFabricoProjeto);
             dgvOrdensFabrico.DataSource = todasOrdensFabricoSub;
         }
 
         private void CarregarArtigosEletricos()
         {
             var artigosEletricos = GetArtigosEletricos(projeto);
-            DataTable dtEletricos = ConvertArtigosEletricosToDataTable(artigosEletricos);
+            System.Data.DataTable dtEletricos = ConvertArtigosEletricosToDataTable(artigosEletricos);
             dgvOrdensFabrico.DataSource = dtEletricos;
         }
 
@@ -109,9 +129,9 @@ namespace ADSucoremaExtensibilidade
             return lista;
         }
 
-        private DataTable GetInfoOrdemFabricoSubGrid(StdBELista todasOrdemFabricoProjeto)
+        private System.Data.DataTable GetInfoOrdemFabricoSubGrid(StdBELista todasOrdemFabricoProjeto)
         {
-            DataTable dt = new DataTable();
+            System.Data.DataTable dt = new System.Data.DataTable();
 
             dt.Columns.Add("Selecionado", typeof(bool));
             dt.Columns.Add("OrdemFabrico", typeof(string));
@@ -511,9 +531,9 @@ namespace ADSucoremaExtensibilidade
             return resultado.DaValor<int>("count") > 0;
         }
 
-        private DataTable ConvertArtigosEletricosToDataTable(StdBELista artigosEletricos)
+        private System.Data.DataTable ConvertArtigosEletricosToDataTable(StdBELista artigosEletricos)
         {
-            DataTable dt = new DataTable();
+            System.Data.DataTable dt = new System.Data.DataTable();
 
             dt.Columns.Add("Selecionado", typeof(bool));
             dt.Columns.Add("OrdemFabrico", typeof(string));
@@ -573,9 +593,250 @@ namespace ADSucoremaExtensibilidade
             return dt;
         }
 
+        private System.Data.DataTable CriarDataTableVazio()
+        {
+            System.Data.DataTable dt = new System.Data.DataTable();
+
+            dt.Columns.Add("Selecionado", typeof(bool));
+            dt.Columns.Add("OrdemFabrico", typeof(string));
+            dt.Columns.Add("Artigo", typeof(string));
+            dt.Columns.Add("Unidade", typeof(string));
+            dt.Columns.Add("QtFabricada", typeof(string));
+            dt.Columns.Add("Liquido", typeof(decimal));
+            dt.Columns.Add("Total", typeof(decimal));
+            dt.Columns.Add("Descricao", typeof(string));
+            dt.Columns.Add("Projecto", typeof(string));
+            dt.Columns.Add("Rececionado", typeof(bool));
+            dt.Columns.Add("SubContratacao", typeof(bool));
+
+            return dt;
+        }
+
         private void cbTipoLista_SelectedIndexChanged(object sender, EventArgs e)
         {
             CarregarListaSelecionada();
+        }
+
+        private void btnExportarTemplateExcel_Click(object sender, EventArgs e)
+        {
+            ExportarTemplateExcel();
+        }
+
+        private void btnImportarExcel_Click(object sender, EventArgs e)
+        {
+            ImportarExcel();
+        }
+
+        private void ExportarTemplateExcel()
+        {
+            try
+            {
+                SaveFileDialog saveDialog = new SaveFileDialog();
+                saveDialog.Filter = "Excel files (*.xlsx)|*.xlsx";
+                saveDialog.DefaultExt = "xlsx";
+                saveDialog.FileName = $"Template_Artigos_{projeto}.xlsx";
+
+                if (saveDialog.ShowDialog() == DialogResult.OK)
+                {
+                    Microsoft.Office.Interop.Excel.Application excelApp = new Microsoft.Office.Interop.Excel.Application();
+                    Workbook workbook = excelApp.Workbooks.Add();
+                    Worksheet worksheet = workbook.ActiveSheet;
+
+                    // Definir cabeçalhos
+                    worksheet.Cells[1, 1] = "Artigo";
+                    worksheet.Cells[1, 2] = "Quantidade";
+                    worksheet.Cells[1, 3] = "Preço Unitário";
+                    worksheet.Cells[1, 4] = "Descrição";
+
+                    // Formatar cabeçalhos
+                    Range headerRange = worksheet.Range["A1:D1"];
+                    headerRange.Font.Bold = true;
+                    headerRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+
+                    // Adicionar exemplo na segunda linha (opcional)
+                    worksheet.Cells[2, 1] = "Exemplo: ART001";
+                    worksheet.Cells[2, 2] = 1;
+                    worksheet.Cells[2, 3] = 0.00;
+                    worksheet.Cells[2, 4] = "Descrição do artigo";
+
+                    // Formatar linha de exemplo em itálico
+                    Range exampleRange = worksheet.Range["A2:D2"];
+                    exampleRange.Font.Italic = true;
+                    exampleRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightYellow);
+
+                    // Ajustar largura das colunas
+                    worksheet.Columns["A:D"].AutoFit();
+
+                    // Salvar o arquivo
+                    workbook.SaveAs(saveDialog.FileName);
+                    workbook.Close();
+                    excelApp.Quit();
+
+                    // Liberar objetos COM
+                    Marshal.ReleaseComObject(worksheet);
+                    Marshal.ReleaseComObject(workbook);
+                    Marshal.ReleaseComObject(excelApp);
+
+                    MessageBox.Show($"Template Excel vazio exportado com sucesso para:\n{saveDialog.FileName}", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao exportar template Excel: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ImportarExcel()
+        {
+            try
+            {
+                OpenFileDialog openDialog = new OpenFileDialog();
+                openDialog.Filter = "Excel files (*.xlsx;*.xls)|*.xlsx;*.xls";
+                openDialog.Title = "Selecionar arquivo Excel com artigos";
+
+                if (openDialog.ShowDialog() == DialogResult.OK)
+                {
+                    Microsoft.Office.Interop.Excel.Application excelApp = new Microsoft.Office.Interop.Excel.Application();
+                    Workbook workbook = excelApp.Workbooks.Open(openDialog.FileName);
+                    Worksheet worksheet = workbook.ActiveSheet;
+
+                    // Criar DataTable para armazenar os dados importados
+                    System.Data.DataTable dtImportados = new System.Data.DataTable();
+                    dtImportados.Columns.Add("Selecionado", typeof(bool));
+                    dtImportados.Columns.Add("OrdemFabrico", typeof(string));
+                    dtImportados.Columns.Add("Artigo", typeof(string));
+                    dtImportados.Columns.Add("Unidade", typeof(string));
+                    dtImportados.Columns.Add("QtFabricada", typeof(string));
+                    dtImportados.Columns.Add("Liquido", typeof(decimal));
+                    dtImportados.Columns.Add("Total", typeof(decimal));
+                    dtImportados.Columns.Add("Descricao", typeof(string));
+                    dtImportados.Columns.Add("Projecto", typeof(string));
+                    dtImportados.Columns.Add("Rececionado", typeof(bool));
+                    dtImportados.Columns.Add("SubContratacao", typeof(bool));
+
+                    // Ler dados do Excel (assumindo que a primeira linha são cabeçalhos)
+                    int row = 2;
+                    int artigosImportados = 0;
+                    List<string> artigosNaoEncontrados = new List<string>();
+
+                    while (worksheet.Cells[row, 1].Value != null)
+                    {
+                        string artigo = worksheet.Cells[row, 1].Value?.ToString().Trim();
+
+                        // Pular linha de exemplo
+                        if (artigo.StartsWith("Exemplo:"))
+                        {
+                            row++;
+                            continue;
+                        }
+
+                        double quantidade = 1; // Quantidade padrão
+                        double precoUnitario = 0;
+                        string descricaoExcel = "";
+
+                        if (worksheet.Cells[row, 2].Value != null)
+                        {
+                            double.TryParse(worksheet.Cells[row, 2].Value.ToString(), out quantidade);
+                        }
+
+                        if (worksheet.Cells[row, 3].Value != null)
+                        {
+                            double.TryParse(worksheet.Cells[row, 3].Value.ToString(), out precoUnitario);
+                        }
+
+                        if (worksheet.Cells[row, 4].Value != null)
+                        {
+                            descricaoExcel = worksheet.Cells[row, 4].Value.ToString();
+                        }
+
+                        if (!string.IsNullOrEmpty(artigo) && quantidade > 0)
+                        {
+                            // Verificar se o artigo existe na base de dados
+                            try
+                            {
+                                var infoArtigo = BSO.Base.Artigos.Edita(artigo);
+                                if (infoArtigo != null)
+                                {
+                                    // Verificar se já existe no documento
+                                    bool existe = false;
+                                    for (int y = 1; y <= this.DocumentoStock.Linhas.NumItens; y++)
+                                    {
+                                        if (this.DocumentoStock.Linhas.GetEdita(y).Artigo == artigo)
+                                        {
+                                            existe = true;
+                                            break;
+                                        }
+                                    }
+
+                                    // Usar descrição do Excel se fornecida, senão usar da base de dados
+                                    string descricaoFinal = !string.IsNullOrEmpty(descricaoExcel) ? descricaoExcel : infoArtigo.Descricao;
+
+                                    dtImportados.Rows.Add(
+                                        true, // Selecionado por defeito
+                                        "", // OrdemFabrico vazio para importados
+                                        artigo,
+                                        infoArtigo.UnidadeBase,
+                                        quantidade.ToString(),
+                                        0.000, // Preço líquido sempre 0 para importados
+                                        precoUnitario, // Usar preço do Excel
+                                        descricaoFinal,
+                                        projeto,
+                                        !existe, // Rececionado = true se não existe ainda
+                                        false // Determinar depois baseado no tipo
+                                    );
+
+                                    artigosImportados++;
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                // Artigo não encontrado na base de dados
+                                artigosNaoEncontrados.Add(artigo);
+                            }
+                        }
+
+                        row++;
+                    }
+
+                    workbook.Close();
+                    excelApp.Quit();
+
+                    // Liberar objetos COM
+                    Marshal.ReleaseComObject(worksheet);
+                    Marshal.ReleaseComObject(workbook);
+                    Marshal.ReleaseComObject(excelApp);
+
+                    if (artigosImportados > 0)
+                    {
+                        // Substituir o DataSource do DataGridView pelos dados importados
+                        dgvOrdensFabrico.DataSource = dtImportados;
+
+                        string mensagem = $"{artigosImportados} artigos importados com sucesso do Excel!";
+
+                        if (artigosNaoEncontrados.Count > 0)
+                        {
+                            mensagem += $"\n\nArtigos não encontrados na base de dados: {string.Join(", ", artigosNaoEncontrados)}";
+                        }
+
+                        MessageBox.Show(mensagem, "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        if (artigosNaoEncontrados.Count > 0)
+                        {
+                            MessageBox.Show($"Nenhum artigo válido encontrado. Artigos não existentes: {string.Join(", ", artigosNaoEncontrados)}", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Nenhum artigo válido encontrado no Excel.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao importar Excel: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

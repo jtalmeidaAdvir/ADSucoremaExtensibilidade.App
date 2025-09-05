@@ -34,6 +34,8 @@
             this.button2 = new System.Windows.Forms.Button();
             this.cbTipoLista = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.btnExportarTemplateExcel = new System.Windows.Forms.Button();
+            this.btnImportarExcel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrdensFabrico)).BeginInit();
             this.SuspendLayout();
             // 
@@ -91,11 +93,33 @@
             this.label1.TabIndex = 4;
             this.label1.Text = "Tipo de Lista:";
             // 
+            // btnExportarTemplateExcel
+            // 
+            this.btnExportarTemplateExcel.Location = new System.Drawing.Point(570, 11);
+            this.btnExportarTemplateExcel.Name = "btnExportarTemplateExcel";
+            this.btnExportarTemplateExcel.Size = new System.Drawing.Size(140, 30);
+            this.btnExportarTemplateExcel.TabIndex = 5;
+            this.btnExportarTemplateExcel.Text = "Exportar Template Excel";
+            this.btnExportarTemplateExcel.UseVisualStyleBackColor = true;
+            this.btnExportarTemplateExcel.Click += new System.EventHandler(this.btnExportarTemplateExcel_Click);
+            // 
+            // btnImportarExcel
+            // 
+            this.btnImportarExcel.Location = new System.Drawing.Point(716, 11);
+            this.btnImportarExcel.Name = "btnImportarExcel";
+            this.btnImportarExcel.Size = new System.Drawing.Size(104, 30);
+            this.btnImportarExcel.TabIndex = 6;
+            this.btnImportarExcel.Text = "Importar Excel";
+            this.btnImportarExcel.UseVisualStyleBackColor = true;
+            this.btnImportarExcel.Click += new System.EventHandler(this.btnImportarExcel_Click);
+            // 
             // EditorOrdemFabricoStocks
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 444);
+            this.ClientSize = new System.Drawing.Size(830, 444);
+            this.Controls.Add(this.btnImportarExcel);
+            this.Controls.Add(this.btnExportarTemplateExcel);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cbTipoLista);
             this.Controls.Add(this.button2);
@@ -117,5 +141,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.ComboBox cbTipoLista;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnExportarTemplateExcel;
+        private System.Windows.Forms.Button btnImportarExcel;
     }
 }
