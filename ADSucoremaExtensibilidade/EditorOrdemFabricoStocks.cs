@@ -33,6 +33,13 @@ namespace ADSucoremaExtensibilidade
             // Adicionar itens ao ComboBox
             cbTipoLista.Items.Add("Artigos Subcontratados");
             cbTipoLista.Items.Add("Artigos Elétricos");
+            cbTipoLista.Items.Add("Matéria Prima");
+            cbTipoLista.Items.Add("Adquiridos Hidráulica");
+            cbTipoLista.Items.Add("Adquiridos Pneumática");
+            cbTipoLista.Items.Add("Adquiridos Mecânicos");
+            cbTipoLista.Items.Add("Artigos Fixação");
+            cbTipoLista.Items.Add("Serviços");
+            cbTipoLista.Items.Add("Todos os Artigos");
             cbTipoLista.SelectedIndex = 0; // Selecionar por defeito os artigos subcontratados
         }
 
@@ -63,15 +70,38 @@ namespace ADSucoremaExtensibilidade
                 return;
             }
 
-            if (cbTipoLista.SelectedIndex == 0)
+            switch (cbTipoLista.SelectedIndex)
             {
-                // Carregar artigos subcontratados
-                CarregarArtigosSubcontratados();
-            }
-            else
-            {
-                // Carregar artigos elétricos
-                CarregarArtigosEletricos();
+                case 0: // Artigos Subcontratados
+                    CarregarArtigosSubcontratados();
+                    break;
+                case 1: // Artigos Elétricos
+                    CarregarArtigosEletricos();
+                    break;
+                case 2: // Matéria Prima (001)
+                    CarregarArtigosPorFamilia("001");
+                    break;
+                case 3: // Adquiridos Hidráulica (002)
+                    CarregarArtigosPorFamilia("002");
+                    break;
+                case 4: // Adquiridos Pneumática (003)
+                    CarregarArtigosPorFamilia("003");
+                    break;
+                case 5: // Adquiridos Mecânicos (005)
+                    CarregarArtigosPorFamilia("005");
+                    break;
+                case 6: // Artigos Fixação (006)
+                    CarregarArtigosPorFamilia("006");
+                    break;
+                case 7: // Serviços (011)
+                    CarregarArtigosPorFamilia("011");
+                    break;
+                case 8: // Todos os Artigos
+                    CarregarTodosOsArtigos();
+                    break;
+                default:
+                    CarregarArtigosSubcontratados();
+                    break;
             }
         }
 
@@ -327,11 +357,11 @@ namespace ADSucoremaExtensibilidade
                     double precoUnitario = 0.000;
                     if (double.TryParse(Qtf, out double quantidadeFabricada) && double.TryParse(total, out double totalValue))
                     {
-                        if (cbTipoLista.SelectedIndex == 1) // Artigos elétricos
+                        if (cbTipoLista.SelectedIndex >= 1) // Artigos elétricos e outras famílias
                         {
-                            precoUnitario = totalValue; // Para elétricos, usar o total como preço unitário
+                            precoUnitario = totalValue; // Para elétricos e outras famílias, usar o total como preço unitário
                         }
-                        else // Artigos subcontratados
+                        else // Artigos subcontratados (índice 0)
                         {
                             if (totalValue != 0)
                             {
@@ -454,6 +484,88 @@ namespace ADSucoremaExtensibilidade
             return BSO.Consulta(query);
         }
 
+        private void CarregarArtigosPorFamilia(string familia)
+        {
+            var artigosFamilia = GetArtigosPorFamilia(projeto, familia);
+            System.Data.DataTable dtFamilia = ConvertArtigosEletricosToDataTable(artigosFamilia);
+            dgvOrdensFabrico.DataSource = dtFamilia;
+        }
+
+        private StdBELista GetArtigosPorFamilia(string codigoProjeto, string familia)
+        {
+            var query = $@"SELECT 
+                            LC.Artigo,
+                            LC.Descricao,
+                            LC.Lote,
+                            LC.Quantidade,
+                            A.Familia,
+                            CC.NumDoc,
+                            CC.Serie,
+                            CO.Codigo,
+                            OFA.OrdemFabrico,
+                            LC.PrecUnit,
+                            LC.PrecoLiquido
+                        FROM 
+                            CabecCompras AS CC
+                        INNER JOIN 
+                            LinhasCompras AS LC ON CC.Id = LC.IdCabecCompras
+                        INNER JOIN 
+                            Artigo AS A ON LC.Artigo = A.Artigo
+                        INNER JOIN 
+                            COP_Obras AS CO ON LC.ObraID = CO.ID
+                        LEFT JOIN 
+                            GPR_OrdemFabrico AS OFA ON LC.Artigo = OFA.Artigo
+                        WHERE 
+                            CC.TipoDoc = 'VFA'
+                            AND LC.Artigo IS NOT NULL
+                            AND A.Familia = '{familia}'
+                            AND LC.ObraID IS NOT NULL
+                            AND CO.Codigo = '{codigoProjeto}'";
+
+            return BSO.Consulta(query);
+        }
+
+        private void CarregarTodosOsArtigos()
+        {
+            var todosOsArtigos = GetTodosOsArtigos(projeto);
+            System.Data.DataTable dtTodos = ConvertArtigosEletricosToDataTable(todosOsArtigos);
+            dgvOrdensFabrico.DataSource = dtTodos;
+        }
+
+        private StdBELista GetTodosOsArtigos(string codigoProjeto)
+        {
+            var query = $@"SELECT 
+                            LC.Artigo,
+                            LC.Descricao,
+                            LC.Lote,
+                            LC.Quantidade,
+                            A.Familia,
+                            CC.NumDoc,
+                            CC.Serie,
+                            CO.Codigo,
+                            OFA.OrdemFabrico,
+                            LC.PrecUnit,
+                            LC.PrecoLiquido
+                        FROM 
+                            CabecCompras AS CC
+                        INNER JOIN 
+                            LinhasCompras AS LC ON CC.Id = LC.IdCabecCompras
+                        INNER JOIN 
+                            Artigo AS A ON LC.Artigo = A.Artigo
+                        INNER JOIN 
+                            COP_Obras AS CO ON LC.ObraID = CO.ID
+                        LEFT JOIN 
+                            GPR_OrdemFabrico AS OFA ON LC.Artigo = OFA.Artigo
+                        WHERE 
+                            CC.TipoDoc = 'VFA'
+                            AND LC.Artigo IS NOT NULL
+                            AND (A.Familia = '001' OR A.Familia = '002' OR A.Familia = '003' OR A.Familia = '004' OR A.Familia = '005' OR A.Familia = '006' OR A.Familia = '011' OR A.Familia = '024')
+                            AND LC.ObraID IS NOT NULL
+                            AND CO.Codigo = '{codigoProjeto}'";
+
+            return BSO.Consulta(query);
+        }
+
         private void InserirArtigosEletricosNoSOF(StdBELista artigosEletricos)
         {
             var documento = BSO.Internos.Documentos.Edita(this.DocumentoStock.Tipodoc, this.DocumentoStock.NumDoc, this.DocumentoStock.Serie, this.DocumentoStock.Filial);
@@ -523,7 +635,7 @@ namespace ADSucoremaExtensibilidade
                                    JOIN GPR_OrdemFabrico GF ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
                                    WHERE CI.TipoDoc = 'SOF' 
                                      AND GF.CDU_CodigoProjeto = '{projeto}'
-                                     AND (A.Familia = '004' OR A.Familia = '024')";
+                                     AND (A.Familia = '001' OR A.Familia = '002' OR A.Familia = '003' OR A.Familia = '004' OR A.Familia = '005' OR A.Familia = '006' OR A.Familia = '011' OR A.Familia = '024')";
 
             var resultado = BSO.Consulta(queryVerificacao);
             resultado.Inicio();
