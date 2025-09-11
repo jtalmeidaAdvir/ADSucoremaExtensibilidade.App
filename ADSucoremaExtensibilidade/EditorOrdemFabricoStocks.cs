@@ -166,6 +166,7 @@ namespace ADSucoremaExtensibilidade
             dt.Columns.Add("Selecionado", typeof(bool));
             dt.Columns.Add("OrdemFabrico", typeof(string));
             dt.Columns.Add("Artigo", typeof(string));
+            dt.Columns.Add("Familia", typeof(string));
             dt.Columns.Add("Unidade", typeof(string));
             dt.Columns.Add("QtFabricada", typeof(string));
             dt.Columns.Add("Liquido", typeof(decimal));
@@ -240,6 +241,7 @@ namespace ADSucoremaExtensibilidade
                             false,
                             resultReal.DaValor<string>("OrdemFabrico"),
                             resultReal.DaValor<string>("Artigo"),
+                            "", // Família será preenchida abaixo
                             "UN",
                             quantidade,
                             liquido,
@@ -256,6 +258,7 @@ namespace ADSucoremaExtensibilidade
                             false,
                             resultReal.DaValor<string>("OrdemFabrico"),
                             resultReal.DaValor<string>("Artigo"),
+                            "", // Família será preenchida abaixo
                             "UN",
                             resultReal.DaValor<string>("QtFabricada"),
                             0.000,
@@ -267,6 +270,23 @@ namespace ADSucoremaExtensibilidade
                         );
                     }
 
+                    // Preencher a família após a criação da linha
+                    var infoArtigo = BSO.Base.Artigos.Edita(resultReal.DaValor<string>("Artigo"));
+                    if (infoArtigo != null)
+                    {
+                        // Buscar a descrição da família
+                        var queryFamilia = $"SELECT Descricao FROM Familias WHERE Familia = '{infoArtigo.Familia}'";
+                        var resultFamilia = BSO.Consulta(queryFamilia);
+
+                        if (resultFamilia.NumLinhas() > 0)
+                        {
+                            dt.Rows[dt.Rows.Count - 1]["Familia"] = resultFamilia.DaValor<string>("Descricao");
+                        }
+                        else
+                        {
+                            dt.Rows[dt.Rows.Count - 1]["Familia"] = infoArtigo.Familia; // Fallback para o código se não encontrar descrição
+                        }
+                    }
 
 
                     resultReal.Seguinte();
@@ -281,35 +301,60 @@ namespace ADSucoremaExtensibilidade
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (dgvOrdensFabrico.Columns[e.ColumnIndex].Name == "Artigo") // Escolha uma coluna relevante
+            if (e.RowIndex >= 0 && e.RowIndex < dgvOrdensFabrico.Rows.Count)
             {
-                string artigo = dgvOrdensFabrico.Rows[e.RowIndex].Cells["Artigo"].Value.ToString();
-                bool existe = false;
+                var row = dgvOrdensFabrico.Rows[e.RowIndex];
 
-                var lista = $@"SELECT COUNT(*) AS count
-                       FROM CabecInternos CI
-                       JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
-                       WHERE CI.TipoDoc = 'SOF' 
-                         AND CI.IdOrdemFabrico = '{this.DocumentoStock.IdOrdemFabrico}'
-                         AND LI.Artigo = '{artigo}';";
-
-                var response = BSO.Consulta(lista);
-                response.Inicio();
-
-                // Se o número de linhas retornadas for maior que 0, o artigo existe
-                if (response.DaValor<int>("count") > 0)
+                // Verificar se é serviço (família 011)
+                bool isServico = false;
+                if (row.Cells["SubContratacao"].Value != null)
                 {
-                    existe = true;
+                    isServico = Convert.ToBoolean(row.Cells["SubContratacao"].Value);
                 }
 
-                // Pinta a linha de cinza claro se o artigo já existir
-                if (existe)
+                if (isServico)
                 {
-                    dgvOrdensFabrico.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightGray;
+                    // Para serviços: cor de fundo amarelo claro e desabilitar checkbox
+                    row.DefaultCellStyle.BackColor = Color.LightYellow;
+                    row.Cells["Selecionado"].ReadOnly = true;
+                    row.Cells["Selecionado"].Style.BackColor = Color.LightYellow;
+                    row.Cells["Selecionado"].Value = false; // Sempre false para serviços
+                    return;
                 }
-                else
+
+                // Para outros artigos, verificar se já existem no SOF
+                if (dgvOrdensFabrico.Columns[e.ColumnIndex].Name == "Artigo")
                 {
-                    dgvOrdensFabrico.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.White;
+                    string artigo = row.Cells["Artigo"].Value?.ToString();
+                    if (!string.IsNullOrEmpty(artigo))
+                    {
+                        bool existe = false;
+
+                        var lista = $@"SELECT COUNT(*) AS count
+                               FROM CabecInternos CI
+                               JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
+                               WHERE CI.TipoDoc = 'SOF' 
+                                 AND CI.IdOrdemFabrico = '{this.DocumentoStock.IdOrdemFabrico}'
+                                 AND LI.Artigo = '{artigo}';";
+
+                        var response = BSO.Consulta(lista);
+                        response.Inicio();
+
+                        if (response.DaValor<int>("count") > 0)
+                        {
+                            existe = true;
+                        }
+
+                        // Pinta a linha de cinza claro se o artigo já existir
+                        if (existe)
+                        {
+                            row.DefaultCellStyle.BackColor = Color.LightGray;
+                        }
+                        else
+                        {
+                            row.DefaultCellStyle.BackColor = Color.White;
+                        }
+                    }
                 }
             }
         }
@@ -318,6 +363,7 @@ namespace ADSucoremaExtensibilidade
         {
             List<DataRow> linhasSelecionadas = new List<DataRow>();
             List<string> artigosJaExistentes = new List<string>();
+            List<string> servicosIgnorados = new List<string>();
             var documento = BSO.Internos.Documentos.Edita(this.DocumentoStock.Tipodoc, this.DocumentoStock.NumDoc, this.DocumentoStock.Serie, this.DocumentoStock.Filial);
 
             foreach (DataGridViewRow row in dgvOrdensFabrico.Rows)
@@ -326,6 +372,14 @@ namespace ADSucoremaExtensibilidade
                 {
                     DataRow dataRow = ((DataRowView)row.DataBoundItem).Row;
                     var artigo = dataRow["Artigo"].ToString();
+
+                    // Verificar se é serviço e ignorar
+                    bool isServico = Convert.ToBoolean(dataRow["SubContratacao"]);
+                    if (isServico)
+                    {
+                        servicosIgnorados.Add(artigo);
+                        continue; // Pula serviços
+                    }
 
                     // Verificar se o artigo já existe no SOF
                     var queryVerificacao = $@"SELECT COUNT(*) AS count
@@ -389,6 +443,7 @@ namespace ADSucoremaExtensibilidade
                     var infoArtigo = BSO.Base.Artigos.Edita(artigo);
                     var unidade = infoArtigo.UnidadeBase;
                     var descricao = infoArtigo.Descricao;
+                    var familia = infoArtigo.Familia;
 
                     IntBELinhaDocumentoInterno linha = new IntBELinhaDocumentoInterno()
                     {
@@ -428,6 +483,19 @@ namespace ADSucoremaExtensibilidade
                 }
             }
 
+            if (servicosIgnorados.Count > 0)
+            {
+                string servicosTexto = string.Join(", ", servicosIgnorados);
+                if (!string.IsNullOrEmpty(mensagem))
+                {
+                    mensagem += $"\n\nServiços ignorados (apenas para visualização): {servicosTexto}";
+                }
+                else
+                {
+                    mensagem = $"Serviços ignorados (apenas para visualização): {servicosTexto}";
+                }
+            }
+
             if (linhasSelecionadas.Count == 0 && artigosJaExistentes.Count == 0)
             {
                 mensagem = "Nenhuma linha foi selecionada.";
@@ -446,7 +514,17 @@ namespace ADSucoremaExtensibilidade
         {
             foreach (DataGridViewRow row in dgvOrdensFabrico.Rows)
             {
-                row.Cells["Selecionado"].Value = true;
+                // Verificar se é serviço antes de selecionar
+                bool isServico = false;
+                if (row.Cells["SubContratacao"].Value != null)
+                {
+                    isServico = Convert.ToBoolean(row.Cells["SubContratacao"].Value);
+                }
+
+                if (!isServico && !row.Cells["Selecionado"].ReadOnly)
+                {
+                    row.Cells["Selecionado"].Value = true;
+                }
             }
         }
 
@@ -598,6 +676,7 @@ namespace ADSucoremaExtensibilidade
                     // Obter informações do artigo
                     var infoArtigo = BSO.Base.Artigos.Edita(artigo);
                     var unidade = infoArtigo.UnidadeBase;
+                    var familia = infoArtigo.Familia;
 
                     IntBELinhaDocumentoInterno linha = new IntBELinhaDocumentoInterno()
                     {
@@ -650,6 +729,7 @@ namespace ADSucoremaExtensibilidade
             dt.Columns.Add("Selecionado", typeof(bool));
             dt.Columns.Add("OrdemFabrico", typeof(string));
             dt.Columns.Add("Artigo", typeof(string));
+            dt.Columns.Add("Familia", typeof(string));
             dt.Columns.Add("Unidade", typeof(string));
             dt.Columns.Add("QtFabricada", typeof(string));
             dt.Columns.Add("Liquido", typeof(decimal));
@@ -685,18 +765,39 @@ namespace ADSucoremaExtensibilidade
                 var infoArtigo = BSO.Base.Artigos.Edita(artigo);
                 var unidade = infoArtigo?.UnidadeBase ?? "UN";
 
+                // Buscar a descrição da família
+                string familia = "";
+                bool isServico = false;
+                if (infoArtigo != null && !string.IsNullOrEmpty(infoArtigo.Familia))
+                {
+                    isServico = infoArtigo.Familia == "011"; // Verificar se é serviço
+
+                    var queryFamilia = $"SELECT Descricao FROM Familias WHERE Familia = '{infoArtigo.Familia}'";
+                    var resultFamilia = BSO.Consulta(queryFamilia);
+
+                    if (resultFamilia.NumLinhas() > 0)
+                    {
+                        familia = resultFamilia.DaValor<string>("Descricao");
+                    }
+                    else
+                    {
+                        familia = infoArtigo.Familia; // Fallback para o código se não encontrar descrição
+                    }
+                }
+
                 dt.Rows.Add(
-                    false,
+                    false, // Checkbox sempre false inicialmente
                     ordemFabrico ?? "",
                     artigo,
+                    familia,
                     unidade,
                     quantidade,
                     precoLiquido,
                     precoUnitario,
                     descricao,
                     projeto,
-                    !existe,
-                    false // Artigos elétricos não são subcontratados
+                    !existe, // Rececionado = true se não existe ainda
+                    isServico // Marcar se é serviço para controle
                 );
 
                 artigosEletricos.Seguinte();
@@ -712,6 +813,7 @@ namespace ADSucoremaExtensibilidade
             dt.Columns.Add("Selecionado", typeof(bool));
             dt.Columns.Add("OrdemFabrico", typeof(string));
             dt.Columns.Add("Artigo", typeof(string));
+            dt.Columns.Add("Familia", typeof(string));
             dt.Columns.Add("Unidade", typeof(string));
             dt.Columns.Add("QtFabricada", typeof(string));
             dt.Columns.Add("Liquido", typeof(decimal));
@@ -759,9 +861,11 @@ namespace ADSucoremaExtensibilidade
                     worksheet.Cells[1, 2] = "Quantidade";
                     worksheet.Cells[1, 3] = "Preço Unitário";
                     worksheet.Cells[1, 4] = "Descrição";
+                    worksheet.Cells[1, 5] = "Familia";
+
 
                     // Formatar cabeçalhos
-                    Range headerRange = worksheet.Range["A1:D1"];
+                    Range headerRange = worksheet.Range["A1:E1"];
                     headerRange.Font.Bold = true;
                     headerRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGray);
 
@@ -770,14 +874,16 @@ namespace ADSucoremaExtensibilidade
                     worksheet.Cells[2, 2] = 1;
                     worksheet.Cells[2, 3] = 0.00;
                     worksheet.Cells[2, 4] = "Descrição do artigo";
+                    worksheet.Cells[2, 5] = "FAM001";
+
 
                     // Formatar linha de exemplo em itálico
-                    Range exampleRange = worksheet.Range["A2:D2"];
+                    Range exampleRange = worksheet.Range["A2:E2"];
                     exampleRange.Font.Italic = true;
                     exampleRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightYellow);
 
                     // Ajustar largura das colunas
-                    worksheet.Columns["A:D"].AutoFit();
+                    worksheet.Columns["A:E"].AutoFit();
 
                     // Salvar o arquivo
                     workbook.SaveAs(saveDialog.FileName);
@@ -817,6 +923,7 @@ namespace ADSucoremaExtensibilidade
                     dtImportados.Columns.Add("Selecionado", typeof(bool));
                     dtImportados.Columns.Add("OrdemFabrico", typeof(string));
                     dtImportados.Columns.Add("Artigo", typeof(string));
+                    dtImportados.Columns.Add("Familia", typeof(string));
                     dtImportados.Columns.Add("Unidade", typeof(string));
                     dtImportados.Columns.Add("QtFabricada", typeof(string));
                     dtImportados.Columns.Add("Liquido", typeof(decimal));
@@ -825,6 +932,7 @@ namespace ADSucoremaExtensibilidade
                     dtImportados.Columns.Add("Projecto", typeof(string));
                     dtImportados.Columns.Add("Rececionado", typeof(bool));
                     dtImportados.Columns.Add("SubContratacao", typeof(bool));
+
 
                     // Ler dados do Excel (assumindo que a primeira linha são cabeçalhos)
                     int row = 2;
@@ -845,6 +953,7 @@ namespace ADSucoremaExtensibilidade
                         double quantidade = 1; // Quantidade padrão
                         double precoUnitario = 0;
                         string descricaoExcel = "";
+                        string familiaExcel = "";
 
                         if (worksheet.Cells[row, 2].Value != null)
                         {
@@ -860,6 +969,12 @@ namespace ADSucoremaExtensibilidade
                         {
                             descricaoExcel = worksheet.Cells[row, 4].Value.ToString();
                         }
+
+                        if (worksheet.Cells[row, 5].Value != null)
+                        {
+                            familiaExcel = worksheet.Cells[row, 5].Value.ToString();
+                        }
+
 
                         if (!string.IsNullOrEmpty(artigo) && quantidade > 0)
                         {
@@ -882,11 +997,14 @@ namespace ADSucoremaExtensibilidade
 
                                     // Usar descrição do Excel se fornecida, senão usar da base de dados
                                     string descricaoFinal = !string.IsNullOrEmpty(descricaoExcel) ? descricaoExcel : infoArtigo.Descricao;
+                                    string familiaFinal = !string.IsNullOrEmpty(familiaExcel) ? familiaExcel : infoArtigo.Familia;
+
 
                                     dtImportados.Rows.Add(
                                         true, // Selecionado por defeito
                                         "", // OrdemFabrico vazio para importados
                                         artigo,
+                                        familiaFinal,
                                         infoArtigo.UnidadeBase,
                                         quantidade.ToString(),
                                         0.000, // Preço líquido sempre 0 para importados
