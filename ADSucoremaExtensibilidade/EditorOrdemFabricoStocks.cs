@@ -144,6 +144,13 @@ namespace ADSucoremaExtensibilidade
             return ordensComSubcontratacao;
         }
 
+        private StdBELista GetInfoOrdemFabricoSub(string idOrdem)
+        {
+            var query = $"SELECT IDOrdemFabrico, SubContratacao FROM GPR_OrdemFabricoOperacoes WHERE IDOrdemFabrico = '{idOrdem}' AND SubContratacao = 1";
+            return BSO.Consulta(query);
+        }
+
+
         private StdBELista GetInfoListaOrdemFabricoProjeto(string projecto)
         {
             var query = $"SELECT IDOrdemFabrico,CDU_CodigoProjeto,* FROM GPR_OrdemFabrico WHERE CDU_CodigoProjeto = '{projecto}'";
@@ -182,96 +189,127 @@ namespace ADSucoremaExtensibilidade
             for (int i = 0; i < num; i++)
             {
                 var idOrdem = todasOrdemFabricoProjeto.DaValor<string>("IDOrdemFabrico");
-                var query = $"SELECT IDOrdemFabrico, SubContratacao, Descricao FROM GPR_OrdemFabricoOperacoes WHERE IDOrdemFabrico = '{idOrdem}' AND SubContratacao = 1";
-                var result = BSO.Consulta(query);
-                var queryOrdem = $"SELECT OrdemFabrico, Artigo, QtFabricada, CustoMateriaisReal, CustoTransformacaoReal, CustoSubprodutosReal, CDU_CodigoProjeto FROM GPR_OrdemFabrico WHERE IDOrdemFabrico = '{idOrdem}'";
-                var resultReal = BSO.Consulta(queryOrdem);
+                var queryOperacoes = $"SELECT SubContratacao, Descricao FROM GPR_OrdemFabricoOperacoes WHERE IDOrdemFabrico = '{idOrdem}' AND SubContratacao = 1";
+                var resultOperacoes = BSO.Consulta(queryOperacoes);
 
-                while (!result.NoFim())
+                var queryOrdem = $"SELECT OrdemFabrico, Artigo, QtFabricada, CustoMateriaisReal, CustoTransformacaoReal, CustoSubprodutosReal, CDU_CodigoProjeto FROM GPR_OrdemFabrico WHERE IDOrdemFabrico = '{idOrdem}'";
+                var resultOrdem = BSO.Consulta(queryOrdem);
+
+                while (!resultOperacoes.NoFim())
                 {
                     decimal SafeGetDecimal(object value) =>
                         value == null || value == DBNull.Value ? 0 : Convert.ToDecimal(value);
 
-                    decimal custoMateriais = SafeGetDecimal(resultReal.DaValor<object>("CustoMateriaisReal"));
-                    decimal custoTransformacao = SafeGetDecimal(resultReal.DaValor<object>("CustoTransformacaoReal"));
-                    decimal custoSubprodutos = SafeGetDecimal(resultReal.DaValor<object>("CustoSubprodutosReal"));
+                    decimal custoMateriais = SafeGetDecimal(resultOrdem.DaValor<object>("CustoMateriaisReal"));
+                    decimal custoTransformacao = SafeGetDecimal(resultOrdem.DaValor<object>("CustoTransformacaoReal"));
+                    decimal custoSubprodutos = SafeGetDecimal(resultOrdem.DaValor<object>("CustoSubprodutosReal"));
                     decimal total = custoMateriais + custoTransformacao + custoSubprodutos;
 
                     // Verifica se o artigo já existe no DocumentoStock.Linhas
-                    bool existe = false;
+                    bool existeNoDocumento = false;
                     for (int y = 1; y <= this.DocumentoStock.Linhas.NumItens; y++)
                     {
-                        if (this.DocumentoStock.Linhas.GetEdita(y).Artigo == resultReal.DaValor<string>("Artigo"))
+                        if (this.DocumentoStock.Linhas.GetEdita(y).Artigo == resultOrdem.DaValor<string>("Artigo"))
                         {
-                            existe = true;
+                            existeNoDocumento = true;
                             break;
                         }
                     }
 
-                    var of = resultReal.DaValor<string>("OrdemFabrico");
-                    var queryUnidade = $@"SELECT 
-                                        L.Descricao,
-                                        L.Unidade,
-                                        L.PrecUnit,
-                                        L.PrecoLiquido,
-                                        L.Quantidade,
-                                        L.IdCabecCompras,
-                                        C.*
-                                    FROM 
-                                        LinhasCompras L
-                                    INNER JOIN 
-                                        CabecCompras C
-                                        ON L.IdCabecCompras = C.ID
-                                    WHERE 
-                                        L.Descricao LIKE '%{of}%' 
-                                        AND C.TipoDoc = 'VFS';";
+                    var ordemFabricoAtual = resultOrdem.DaValor<string>("OrdemFabrico");
+                    var artigoAtual = resultOrdem.DaValor<string>("Artigo");
 
-                    var resultvfa = BSO.Consulta(queryUnidade);
+                    // Verifica se o artigo já foi rececionado para artigos subcontratados
+                    bool jaRececionado = false;
 
-                    var numlinhas = resultvfa.NumLinhas();
-                    if (numlinhas > 0)
+                    // Lógica para artigos subcontratados (TipoDoc = 'VFS' e busca na descrição)
+                    if (resultOperacoes.DaValor<bool>("SubContratacao"))
                     {
-                        var quantidade = Math.Round(Math.Abs(Convert.ToDouble(resultvfa.DaValor<string>("Quantidade"))), 3);
-                        var totalpositivo = Math.Round(Math.Abs(Convert.ToDouble(resultvfa.DaValor<string>("PrecUnit"))), 4);
-                        var liquido = Math.Round(Math.Abs(Convert.ToDouble(resultvfa.DaValor<string>("PrecoLiquido"))), 4);
+                        var queryRececaoVFS = $@"SELECT 
+                                                L.Descricao,
+                                                L.Unidade,
+                                                L.PrecUnit,
+                                                L.PrecoLiquido,
+                                                L.Quantidade,
+                                                L.IdCabecCompras,
+                                                C.*
+                                            FROM 
+                                                LinhasCompras L
+                                            INNER JOIN 
+                                                CabecCompras C
+                                                ON L.IdCabecCompras = C.ID
+                                            WHERE 
+                                                L.Descricao LIKE '%{ordemFabricoAtual}%' 
+                                                AND C.TipoDoc = 'VFS';";
 
-
-                        var unida = resultvfa.DaValor<string>("Unidade");
-                        dt.Rows.Add(
-                            false,
-                            resultReal.DaValor<string>("OrdemFabrico"),
-                            resultReal.DaValor<string>("Artigo"),
-                            "", // Família será preenchida abaixo
-                            "UN",
-                            quantidade,
-                            liquido,
-                            totalpositivo,
-                            result.DaValor<string>("Descricao"),
-                            resultReal.DaValor<string>("CDU_CodigoProjeto"),
-                            true,
-                            result.DaValor<bool>("SubContratacao")
-                        );
+                        var resultVFS = BSO.Consulta(queryRececaoVFS);
+                        if (resultVFS.NumLinhas() > 0)
+                        {
+                            jaRececionado = true;
+                        }
                     }
+                    // Lógica para outros artigos (verificar no documento 'VFA' pelo campo L.artigo)
                     else
                     {
-                        dt.Rows.Add(
-                            false,
-                            resultReal.DaValor<string>("OrdemFabrico"),
-                            resultReal.DaValor<string>("Artigo"),
-                            "", // Família será preenchida abaixo
-                            "UN",
-                            resultReal.DaValor<string>("QtFabricada"),
-                            0.000,
-                            0.000,
-                            result.DaValor<string>("Descricao"),
-                            resultReal.DaValor<string>("CDU_CodigoProjeto"),
-                            false,
-                            result.DaValor<bool>("SubContratacao")
-                        );
+                        var queryRececaoVFA = $@"SELECT 
+                                                c.NumDoc,
+                                                L.Artigo,
+                                                L.Unidade,
+                                                L.PrecUnit,
+                                                L.PrecoLiquido,
+                                                L.Quantidade,
+                                                L.IdCabecCompras,
+                                                L.ObraID,
+                                                CO.Codigo,
+                                                C.*
+                                            FROM 
+                                                LinhasCompras L
+                                            INNER JOIN 
+                                                CabecCompras C
+                                                ON L.IdCabecCompras = C.ID
+                                            INNER JOIN 
+                                                COP_Obras AS CO ON L.ObraID = CO.ID
+                                            WHERE 
+                                                L.Artigo = '{artigoAtual}' 
+                                                AND C.TipoDoc = 'VFA'
+                                                AND CO.Codigo = '{projeto}';";
+
+                        var resultVFA = BSO.Consulta(queryRececaoVFA);
+                        if (resultVFA.NumLinhas() > 0)
+                        {
+                            jaRececionado = true;
+                        }
                     }
 
+                    // Se não foi rececionado e não existe no documento, considerar como não rececionado
+                    if (!jaRececionado && !existeNoDocumento)
+                    {
+                        jaRececionado = false;
+                    }
+                    else if (!jaRececionado && existeNoDocumento)
+                    {
+                        // Se não foi rececionado mas existe no documento, considerar como não rececionado também
+                        jaRececionado = false;
+                    }
+                    // Se foi rececionado, independente de existir no documento, jáRececionado fica true.
+
+                    dt.Rows.Add(
+                        false,
+                        resultOrdem.DaValor<string>("OrdemFabrico"),
+                        resultOrdem.DaValor<string>("Artigo"),
+                        "", // Família será preenchida abaixo
+                        "UN",
+                        resultOrdem.DaValor<string>("QtFabricada"),
+                        0.000,
+                        total,
+                        resultOperacoes.DaValor<string>("Descricao"),
+                        resultOrdem.DaValor<string>("CDU_CodigoProjeto"),
+                        jaRececionado, // Usar a verificação real das VFA
+                        resultOperacoes.DaValor<bool>("SubContratacao")
+                    );
+
                     // Preencher a família após a criação da linha
-                    var infoArtigoSub = BSO.Base.Artigos.Edita(resultReal.DaValor<string>("Artigo"));
+                    var infoArtigoSub = BSO.Base.Artigos.Edita(resultOrdem.DaValor<string>("Artigo"));
                     if (infoArtigoSub != null)
                     {
                         // Buscar a descrição da família
@@ -288,9 +326,8 @@ namespace ADSucoremaExtensibilidade
                         }
                     }
 
-
-                    resultReal.Seguinte();
-                    result.Seguinte();
+                    resultOrdem.Seguinte();
+                    resultOperacoes.Seguinte();
                 }
 
                 todasOrdemFabricoProjeto.Seguinte();
@@ -298,6 +335,7 @@ namespace ADSucoremaExtensibilidade
 
             return dt;
         }
+
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
@@ -339,7 +377,8 @@ namespace ADSucoremaExtensibilidade
                                JOIN [GPR_OrdemFabrico] GF ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
                                WHERE CI.TipoDoc = 'SOF' 
                                  AND GF.CDU_CodigoProjeto = '{projeto}'
-                                 AND LI.Artigo = '{artigo}';";
+                                 AND LI.Artigo = '{artigo}'
+                                    AND IDOperadorGPR > 0;";
 
                         var response = BSO.Consulta(lista);
                         response.Inicio();
@@ -561,7 +600,7 @@ namespace ADSucoremaExtensibilidade
                         LEFT JOIN 
                             GPR_OrdemFabrico AS OFA ON LC.Artigo = OFA.Artigo
                         WHERE 
-                            CC.TipoDoc = 'VFA'
+                            CC.TipoDoc = 'ECF'
                             AND LC.Artigo IS NOT NULL
                             AND (A.Familia = '004' OR A.Familia = '024')
                             AND LC.ObraID IS NOT NULL
@@ -602,7 +641,7 @@ namespace ADSucoremaExtensibilidade
                         LEFT JOIN 
                             GPR_OrdemFabrico AS OFA ON LC.Artigo = OFA.Artigo
                         WHERE 
-                            CC.TipoDoc = 'VFA'
+                            CC.TipoDoc = 'ECF'
                             AND LC.Artigo IS NOT NULL
                             AND A.Familia = '{familia}'
                             AND LC.ObraID IS NOT NULL
@@ -643,7 +682,7 @@ namespace ADSucoremaExtensibilidade
                         LEFT JOIN 
                             GPR_OrdemFabrico AS OFA ON LC.Artigo = OFA.Artigo
                         WHERE 
-                            CC.TipoDoc = 'VFA'
+                            CC.TipoDoc = 'ECF'
                             AND LC.Artigo IS NOT NULL
                             AND (A.Familia = '001' OR A.Familia = '002' OR A.Familia = '003' OR A.Familia = '004' OR A.Familia = '005' OR A.Familia = '006' OR A.Familia = '011' OR A.Familia = '024')
                             AND LC.ObraID IS NOT NULL
@@ -793,6 +832,37 @@ namespace ADSucoremaExtensibilidade
                     }
                 }
 
+                // Verificar se o artigo foi rececionado nas VFA
+                bool jaRececionado = false;
+                var queryRececaoVFA = $@"SELECT 
+                                        c.NumDoc,
+                                        L.Artigo,
+                                        L.Unidade,
+                                        L.PrecUnit,
+                                        L.PrecoLiquido,
+                                        L.Quantidade,
+                                        L.IdCabecCompras,
+                                        L.ObraID,
+                                        CO.Codigo,
+                                        C.*
+                                    FROM 
+                                        LinhasCompras L
+                                    INNER JOIN 
+                                        CabecCompras C
+                                        ON L.IdCabecCompras = C.ID
+                                    INNER JOIN 
+                                        COP_Obras AS CO ON L.ObraID = CO.ID
+                                    WHERE 
+                                        L.Artigo = '{artigo}' 
+                                        AND C.TipoDoc = 'VFA'
+                                        AND CO.Codigo = '{projeto}';";
+
+                var resultVFA = BSO.Consulta(queryRececaoVFA);
+                if (resultVFA.NumLinhas() > 0)
+                {
+                    jaRececionado = true;
+                }
+
                 dt.Rows.Add(
                     false, // Checkbox sempre false inicialmente
                     ordemFabrico ?? "",
@@ -804,7 +874,7 @@ namespace ADSucoremaExtensibilidade
                     precoUnitario,
                     descricao,
                     projeto,
-                    !existe, // Rececionado = true se não existe ainda
+                    jaRececionado, // Usar a verificação real das VFA
                     isServico // Marcar se é serviço para controle
                 );
 

@@ -43,14 +43,14 @@
             // 
             this.dgvOrdensFabrico.AllowUserToAddRows = false;
             this.dgvOrdensFabrico.AllowUserToDeleteRows = false;
-            this.dgvOrdensFabrico.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.dgvOrdensFabrico.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvOrdensFabrico.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvOrdensFabrico.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvOrdensFabrico.Location = new System.Drawing.Point(12, 48);
             this.dgvOrdensFabrico.Name = "dgvOrdensFabrico";
-            this.dgvOrdensFabrico.Size = new System.Drawing.Size(776, 384);
+            this.dgvOrdensFabrico.Size = new System.Drawing.Size(806, 384);
             this.dgvOrdensFabrico.TabIndex = 0;
             this.dgvOrdensFabrico.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormatting);
             // 
@@ -89,7 +89,7 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(280, 19);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(64, 13);
+            this.label1.Size = new System.Drawing.Size(71, 13);
             this.label1.TabIndex = 4;
             this.label1.Text = "Tipo de Lista:";
             // 
@@ -131,6 +131,7 @@
             this.Text = "EditorOrdemFabricoStocks";
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrdensFabrico)).EndInit();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
