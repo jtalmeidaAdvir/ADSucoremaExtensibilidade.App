@@ -271,20 +271,20 @@ namespace ADSucoremaExtensibilidade
                     }
 
                     // Preencher a família após a criação da linha
-                    var infoArtigo = BSO.Base.Artigos.Edita(resultReal.DaValor<string>("Artigo"));
-                    if (infoArtigo != null)
+                    var infoArtigoSub = BSO.Base.Artigos.Edita(resultReal.DaValor<string>("Artigo"));
+                    if (infoArtigoSub != null)
                     {
                         // Buscar a descrição da família
-                        var queryFamilia = $"SELECT Descricao FROM Familias WHERE Familia = '{infoArtigo.Familia}'";
-                        var resultFamilia = BSO.Consulta(queryFamilia);
+                        var queryFamiliaSub = $"SELECT Descricao FROM Familias WHERE Familia = '{infoArtigoSub.Familia}'";
+                        var resultFamiliaSub = BSO.Consulta(queryFamiliaSub);
 
-                        if (resultFamilia.NumLinhas() > 0)
+                        if (resultFamiliaSub.NumLinhas() > 0)
                         {
-                            dt.Rows[dt.Rows.Count - 1]["Familia"] = resultFamilia.DaValor<string>("Descricao");
+                            dt.Rows[dt.Rows.Count - 1]["Familia"] = resultFamiliaSub.DaValor<string>("Descricao");
                         }
                         else
                         {
-                            dt.Rows[dt.Rows.Count - 1]["Familia"] = infoArtigo.Familia; // Fallback para o código se não encontrar descrição
+                            dt.Rows[dt.Rows.Count - 1]["Familia"] = infoArtigoSub.Familia; // Fallback para o código se não encontrar descrição
                         }
                     }
 
@@ -305,11 +305,13 @@ namespace ADSucoremaExtensibilidade
             {
                 var row = dgvOrdensFabrico.Rows[e.RowIndex];
 
-                // Verificar se é serviço (família 011)
+                // Verificar se é serviço (família 011) através da família, não da subcontratação
                 bool isServico = false;
-                if (row.Cells["SubContratacao"].Value != null)
+                if (row.Cells["Familia"].Value != null)
                 {
-                    isServico = Convert.ToBoolean(row.Cells["SubContratacao"].Value);
+                    string familia = row.Cells["Familia"].Value.ToString();
+                    // Verificar se a família é "011" ou se a descrição contém "Serviços"
+                    isServico = familia == "011" || familia.ToLower().Contains("serviço");
                 }
 
                 if (isServico)
@@ -322,7 +324,7 @@ namespace ADSucoremaExtensibilidade
                     return;
                 }
 
-                // Para outros artigos, verificar se já existem no SOF
+                // Para outros artigos, verificar se já existem em SOFs do projeto
                 if (dgvOrdensFabrico.Columns[e.ColumnIndex].Name == "Artigo")
                 {
                     string artigo = row.Cells["Artigo"].Value?.ToString();
@@ -330,11 +332,13 @@ namespace ADSucoremaExtensibilidade
                     {
                         bool existe = false;
 
+                        // Verificar se já existe em qualquer SOF do projeto
                         var lista = $@"SELECT COUNT(*) AS count
                                FROM CabecInternos CI
                                JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
+                               JOIN [GPR_OrdemFabrico] GF ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
                                WHERE CI.TipoDoc = 'SOF' 
-                                 AND CI.IdOrdemFabrico = '{this.DocumentoStock.IdOrdemFabrico}'
+                                 AND GF.CDU_CodigoProjeto = '{projeto}'
                                  AND LI.Artigo = '{artigo}';";
 
                         var response = BSO.Consulta(lista);
@@ -345,7 +349,7 @@ namespace ADSucoremaExtensibilidade
                             existe = true;
                         }
 
-                        // Pinta a linha de cinza claro se o artigo já existir
+                        // Pinta a linha de cinza claro se o artigo já existir em qualquer SOF do projeto
                         if (existe)
                         {
                             row.DefaultCellStyle.BackColor = Color.LightGray;
@@ -374,19 +378,21 @@ namespace ADSucoremaExtensibilidade
                     var artigo = dataRow["Artigo"].ToString();
 
                     // Verificar se é serviço e ignorar
-                    bool isServico = Convert.ToBoolean(dataRow["SubContratacao"]);
+                    string familia = dataRow["Familia"].ToString();
+                    bool isServico = familia == "011" || familia.ToLower().Contains("serviço");
                     if (isServico)
                     {
                         servicosIgnorados.Add(artigo);
                         continue; // Pula serviços
                     }
 
-                    // Verificar se o artigo já existe no SOF
+                    // Verificar se o artigo já existe em qualquer SOF do projeto
                     var queryVerificacao = $@"SELECT COUNT(*) AS count
                                            FROM CabecInternos CI
                                            JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
+                                           JOIN [GPR_OrdemFabrico] GF ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
                                            WHERE CI.TipoDoc = 'SOF' 
-                                             AND CI.IdOrdemFabrico = '{this.DocumentoStock.IdOrdemFabrico}'
+                                             AND GF.CDU_CodigoProjeto = '{projeto}'
                                              AND LI.Artigo = '{artigo}';";
 
                     var resultadoVerificacao = BSO.Consulta(queryVerificacao);
@@ -443,7 +449,7 @@ namespace ADSucoremaExtensibilidade
                     var infoArtigo = BSO.Base.Artigos.Edita(artigo);
                     var unidade = infoArtigo.UnidadeBase;
                     var descricao = infoArtigo.Descricao;
-                    var familia = infoArtigo.Familia;
+                    var codigoFamilia = infoArtigo.Familia;
 
                     IntBELinhaDocumentoInterno linha = new IntBELinhaDocumentoInterno()
                     {
@@ -516,9 +522,11 @@ namespace ADSucoremaExtensibilidade
             {
                 // Verificar se é serviço antes de selecionar
                 bool isServico = false;
-                if (row.Cells["SubContratacao"].Value != null)
+                if (row.Cells["Familia"].Value != null)
                 {
-                    isServico = Convert.ToBoolean(row.Cells["SubContratacao"].Value);
+                    string familia = row.Cells["Familia"].Value.ToString();
+                    // Verificar se a família é "011" ou se a descrição contém "Serviços"
+                    isServico = familia == "011" || familia.ToLower().Contains("serviço");
                 }
 
                 if (!isServico && !row.Cells["Selecionado"].ReadOnly)
@@ -766,7 +774,7 @@ namespace ADSucoremaExtensibilidade
                 var unidade = infoArtigo?.UnidadeBase ?? "UN";
 
                 // Buscar a descrição da família
-                string familia = "";
+                string descricaoFamilia = "";
                 bool isServico = false;
                 if (infoArtigo != null && !string.IsNullOrEmpty(infoArtigo.Familia))
                 {
@@ -777,11 +785,11 @@ namespace ADSucoremaExtensibilidade
 
                     if (resultFamilia.NumLinhas() > 0)
                     {
-                        familia = resultFamilia.DaValor<string>("Descricao");
+                        descricaoFamilia = resultFamilia.DaValor<string>("Descricao");
                     }
                     else
                     {
-                        familia = infoArtigo.Familia; // Fallback para o código se não encontrar descrição
+                        descricaoFamilia = infoArtigo.Familia; // Fallback para o código se não encontrar descrição
                     }
                 }
 
@@ -789,7 +797,7 @@ namespace ADSucoremaExtensibilidade
                     false, // Checkbox sempre false inicialmente
                     ordemFabrico ?? "",
                     artigo,
-                    familia,
+                    descricaoFamilia,
                     unidade,
                     quantidade,
                     precoLiquido,

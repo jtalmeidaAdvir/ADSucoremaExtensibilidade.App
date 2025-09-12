@@ -24,7 +24,7 @@ namespace ADSucoremaExtensibilidade
         private void bt_localizar_Click(object sender, EventArgs e)
         {
             OrdemFabrico = TXT_OrdemFabrico.Text;
-           
+
             var getArtigo = $@"SELECT Artigo FROM GPR_OrdemFabrico WHERE OrdemFabrico = '{OrdemFabrico}'";
 
             var artigo = BSO.Consulta(getArtigo);
@@ -52,7 +52,7 @@ namespace ADSucoremaExtensibilidade
             var queryQuantidade = $@"SELECT QtFabricada FROM GPR_OrdemFabrico WHERE ordemFabrico = '{OrdemFabrico}'";
             var quantidades = BSO.Consulta(queryQuantidade);
 
-          
+
             TXT_qtdsof.Text = quantidades.DaValor<string>("QtFabricada");
 
 
@@ -129,7 +129,7 @@ namespace ADSucoremaExtensibilidade
 
 
             //////////////////////////////
-            
+
 
 
             var querydocEOF = $@"SELECT 
@@ -154,7 +154,7 @@ namespace ADSucoremaExtensibilidade
                 for (int y = 1; y < numli + 1; y++)
                 {
                     var linha = doc.Linhas.GetEdita(y);
-                    if(linha.Artigo == Artigo)
+                    if (linha.Artigo == Artigo)
                     {
                         if (double.TryParse(numberStr, NumberStyles.Any, CultureInfo.InvariantCulture, out double valor) &&
                         double.TryParse(quantidadeEOF, NumberStyles.Any, CultureInfo.InvariantCulture, out double quantidade) &&
@@ -209,7 +209,7 @@ namespace ADSucoremaExtensibilidade
             if (ResQuery.Count > 0)
             {
                 code = ResQuery.ElementAt(0);
-               
+
             }
         }
 
