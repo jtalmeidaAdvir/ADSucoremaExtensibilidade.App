@@ -21,6 +21,13 @@ namespace ADSucoremaExtensibilidade
         // Cache para otimização de consultas
         private Dictionary<string, bool> _cacheArtigosSOF = new Dictionary<string, bool>();
 
+        // Variáveis de paginação
+        private int _paginaAtual = 1;
+        private int _itensPorPagina = 25;
+        private int _totalItens = 0;
+        private int _totalPaginas = 0;
+        private System.Data.DataTable _dadosCompletos = null;
+
         public EditorOrdemFabricoStocks(ErpBS100.ErpBS bSO, StdPlatBS100.StdBSInterfPub pSO, IntBE100.IntBEDocumentoInterno documentoStock)
         {
             InitializeComponent();
@@ -28,6 +35,7 @@ namespace ADSucoremaExtensibilidade
             PSO = pSO;
             DocumentoStock = documentoStock;
             ConfigurarComboBox();
+            ConfigurarPaginacao();
             GetValores();
         }
 
@@ -44,6 +52,12 @@ namespace ADSucoremaExtensibilidade
             cbTipoLista.Items.Add("Serviços");
             cbTipoLista.Items.Add("Todos os Artigos");
             cbTipoLista.SelectedIndex = 0; // Selecionar por defeito os artigos subcontratados
+        }
+
+        private void ConfigurarPaginacao()
+        {
+            cbItensPorPagina.SelectedIndex = 0; // 25 itens por defeito
+            AtualizarEstadoBotoesPaginacao();
         }
 
         private void GetValores()
@@ -68,58 +82,61 @@ namespace ADSucoremaExtensibilidade
             // Se não há projeto definido, mostrar grid vazio
             if (string.IsNullOrEmpty(projeto))
             {
-                System.Data.DataTable dtVazio = CriarDataTableVazio();
-                dgvOrdensFabrico.DataSource = dtVazio;
+                _dadosCompletos = CriarDataTableVazio();
+                AplicarPaginacao();
                 return;
             }
 
+            // Carregar dados completos baseado na seleção
             switch (cbTipoLista.SelectedIndex)
             {
                 case 0: // Artigos Subcontratados
-                    CarregarArtigosSubcontratados();
+                    CarregarArtigosSubcontratadosCompleto();
                     break;
                 case 1: // Artigos Elétricos
-                    CarregarArtigosEletricos();
+                    CarregarArtigosEletricosCompleto();
                     break;
                 case 2: // Matéria Prima (001)
-                    CarregarArtigosPorFamilia("001");
+                    CarregarArtigosPorFamiliaCompleto("001");
                     break;
                 case 3: // Adquiridos Hidráulica (002)
-                    CarregarArtigosPorFamilia("002");
+                    CarregarArtigosPorFamiliaCompleto("002");
                     break;
                 case 4: // Adquiridos Pneumática (003)
-                    CarregarArtigosPorFamilia("003");
+                    CarregarArtigosPorFamiliaCompleto("003");
                     break;
                 case 5: // Adquiridos Mecânicos (005)
-                    CarregarArtigosPorFamilia("005");
+                    CarregarArtigosPorFamiliaCompleto("005");
                     break;
                 case 6: // Artigos Fixação (006)
-                    CarregarArtigosPorFamilia("006");
+                    CarregarArtigosPorFamiliaCompleto("006");
                     break;
                 case 7: // Serviços (011)
-                    CarregarArtigosPorFamilia("011");
+                    CarregarArtigosPorFamiliaCompleto("011");
                     break;
                 case 8: // Todos os Artigos
-                    CarregarTodosOsArtigos();
+                    CarregarTodosOsArtigosCompleto();
                     break;
                 default:
-                    CarregarArtigosSubcontratados();
+                    CarregarArtigosSubcontratadosCompleto();
                     break;
             }
+
+            // Resetar para primeira página e aplicar paginação
+            _paginaAtual = 1;
+            AplicarPaginacao();
         }
 
-        private void CarregarArtigosSubcontratados()
+        private void CarregarArtigosSubcontratadosCompleto()
         {
             var todasOrdemFabricoProjeto = GetInfoListaOrdemFabricoProjeto(projeto);
-            System.Data.DataTable todasOrdensFabricoSub = GetInfoOrdemFabricoSubGrid(todasOrdemFabricoProjeto);
-            dgvOrdensFabrico.DataSource = todasOrdensFabricoSub;
+            _dadosCompletos = GetInfoOrdemFabricoSubGrid(todasOrdemFabricoProjeto);
         }
 
-        private void CarregarArtigosEletricos()
+        private void CarregarArtigosEletricosCompleto()
         {
             var artigosEletricos = GetArtigosEletricos(projeto);
-            System.Data.DataTable dtEletricos = ConvertArtigosEletricosToDataTable(artigosEletricos);
-            dgvOrdensFabrico.DataSource = dtEletricos;
+            _dadosCompletos = ConvertArtigosEletricosToDataTable(artigosEletricos);
         }
 
         private List<StdBELista> GetInfoOrdemFabricoSub(StdBELista todasOrdemFabricoProjeto)
@@ -647,11 +664,10 @@ namespace ADSucoremaExtensibilidade
             return BSO.Consulta(query);
         }
 
-        private void CarregarArtigosPorFamilia(string familia)
+        private void CarregarArtigosPorFamiliaCompleto(string familia)
         {
             var artigosFamilia = GetArtigosPorFamilia(projeto, familia);
-            System.Data.DataTable dtFamilia = ConvertArtigosEletricosToDataTable(artigosFamilia);
-            dgvOrdensFabrico.DataSource = dtFamilia;
+            _dadosCompletos = ConvertArtigosEletricosToDataTable(artigosFamilia);
         }
 
         private StdBELista GetArtigosPorFamilia(string codigoProjeto, string familia)
@@ -688,11 +704,10 @@ namespace ADSucoremaExtensibilidade
             return BSO.Consulta(query);
         }
 
-        private void CarregarTodosOsArtigos()
+        private void CarregarTodosOsArtigosCompleto()
         {
             var todosOsArtigos = GetTodosOsArtigos(projeto);
-            System.Data.DataTable dtTodos = ConvertArtigosEletricosToDataTable(todosOsArtigos);
-            dgvOrdensFabrico.DataSource = dtTodos;
+            _dadosCompletos = ConvertArtigosEletricosToDataTable(todosOsArtigos);
         }
 
         private StdBELista GetTodosOsArtigos(string codigoProjeto)
@@ -962,6 +977,134 @@ namespace ADSucoremaExtensibilidade
             bool existe = response.DaValor<int>("count") > 0;
             _cacheArtigosSOF[artigo] = existe;
             return existe;
+        }
+
+        private void AplicarPaginacao()
+        {
+            if (_dadosCompletos == null)
+            {
+                dgvOrdensFabrico.DataSource = null;
+                AtualizarInfoPaginacao();
+                return;
+            }
+
+            _totalItens = _dadosCompletos.Rows.Count;
+
+            if (cbItensPorPagina.SelectedItem?.ToString() == "Todos" || _itensPorPagina <= 0)
+            {
+                dgvOrdensFabrico.DataSource = _dadosCompletos;
+                _totalPaginas = 1;
+                _paginaAtual = 1;
+            }
+            else
+            {
+                _totalPaginas = (int)Math.Ceiling((double)_totalItens / _itensPorPagina);
+
+                if (_paginaAtual > _totalPaginas && _totalPaginas > 0)
+                    _paginaAtual = _totalPaginas;
+
+                if (_paginaAtual < 1)
+                    _paginaAtual = 1;
+
+                var dadosPagina = ObterDadosPagina();
+                dgvOrdensFabrico.DataSource = dadosPagina;
+            }
+
+            AtualizarInfoPaginacao();
+            AtualizarEstadoBotoesPaginacao();
+        }
+
+        private System.Data.DataTable ObterDadosPagina()
+        {
+            var dadosPagina = _dadosCompletos.Clone();
+
+            int inicio = (_paginaAtual - 1) * _itensPorPagina;
+            int fim = Math.Min(inicio + _itensPorPagina, _totalItens);
+
+            for (int i = inicio; i < fim; i++)
+            {
+                dadosPagina.ImportRow(_dadosCompletos.Rows[i]);
+            }
+
+            return dadosPagina;
+        }
+
+        private void AtualizarInfoPaginacao()
+        {
+            if (_totalItens == 0)
+            {
+                lblPagina.Text = "Nenhum item encontrado";
+            }
+            else if (cbItensPorPagina.SelectedItem?.ToString() == "Todos")
+            {
+                lblPagina.Text = $"Todos os {_totalItens} itens";
+            }
+            else
+            {
+                int inicio = (_paginaAtual - 1) * _itensPorPagina + 1;
+                int fim = Math.Min(_paginaAtual * _itensPorPagina, _totalItens);
+                lblPagina.Text = $"Página {_paginaAtual} de {_totalPaginas} ({inicio}-{fim} de {_totalItens})";
+            }
+        }
+
+        private void AtualizarEstadoBotoesPaginacao()
+        {
+            bool temItens = _totalItens > 0;
+            bool multipalasPaginas = _totalPaginas > 1;
+            bool naoEPrimeira = _paginaAtual > 1;
+            bool naoEUltima = _paginaAtual < _totalPaginas;
+
+            btnPrimeira.Enabled = temItens && multipalasPaginas && naoEPrimeira;
+            btnAnterior.Enabled = temItens && multipalasPaginas && naoEPrimeira;
+            btnProxima.Enabled = temItens && multipalasPaginas && naoEUltima;
+            btnUltima.Enabled = temItens && multipalasPaginas && naoEUltima;
+        }
+
+        private void btnPrimeira_Click(object sender, EventArgs e)
+        {
+            _paginaAtual = 1;
+            AplicarPaginacao();
+        }
+
+        private void btnAnterior_Click(object sender, EventArgs e)
+        {
+            if (_paginaAtual > 1)
+            {
+                _paginaAtual--;
+                AplicarPaginacao();
+            }
+        }
+
+        private void btnProxima_Click(object sender, EventArgs e)
+        {
+            if (_paginaAtual < _totalPaginas)
+            {
+                _paginaAtual++;
+                AplicarPaginacao();
+            }
+        }
+
+        private void btnUltima_Click(object sender, EventArgs e)
+        {
+            _paginaAtual = _totalPaginas;
+            AplicarPaginacao();
+        }
+
+        private void cbItensPorPagina_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string valorSelecionado = cbItensPorPagina.SelectedItem?.ToString();
+
+            if (valorSelecionado == "Todos")
+            {
+                _itensPorPagina = -1; // Indicador para mostrar todos
+            }
+            else if (int.TryParse(valorSelecionado, out int novoValor))
+            {
+                _itensPorPagina = novoValor;
+            }
+
+            _paginaAtual = 1;
+            AplicarPaginacao();
         }
 
         private void cbTipoLista_SelectedIndexChanged(object sender, EventArgs e)

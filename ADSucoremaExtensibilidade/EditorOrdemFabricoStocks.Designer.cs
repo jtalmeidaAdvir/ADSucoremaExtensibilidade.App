@@ -36,6 +36,12 @@
             this.label1 = new System.Windows.Forms.Label();
             this.btnExportarTemplateExcel = new System.Windows.Forms.Button();
             this.btnImportarExcel = new System.Windows.Forms.Button();
+            this.btnPrimeira = new System.Windows.Forms.Button();
+            this.btnAnterior = new System.Windows.Forms.Button();
+            this.btnProxima = new System.Windows.Forms.Button();
+            this.btnUltima = new System.Windows.Forms.Button();
+            this.lblPagina = new System.Windows.Forms.Label();
+            this.cbItensPorPagina = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrdensFabrico)).BeginInit();
             this.SuspendLayout();
             // 
@@ -43,14 +49,14 @@
             // 
             this.dgvOrdensFabrico.AllowUserToAddRows = false;
             this.dgvOrdensFabrico.AllowUserToDeleteRows = false;
-            this.dgvOrdensFabrico.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.dgvOrdensFabrico.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvOrdensFabrico.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvOrdensFabrico.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvOrdensFabrico.Location = new System.Drawing.Point(12, 48);
             this.dgvOrdensFabrico.Name = "dgvOrdensFabrico";
-            this.dgvOrdensFabrico.Size = new System.Drawing.Size(806, 384);
+            this.dgvOrdensFabrico.Size = new System.Drawing.Size(806, 354);
             this.dgvOrdensFabrico.TabIndex = 0;
             this.dgvOrdensFabrico.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dataGridView1_CellFormatting);
             // 
@@ -113,11 +119,87 @@
             this.btnImportarExcel.UseVisualStyleBackColor = true;
             this.btnImportarExcel.Click += new System.EventHandler(this.btnImportarExcel_Click);
             // 
+            // btnPrimeira
+            // 
+            this.btnPrimeira.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnPrimeira.Location = new System.Drawing.Point(12, 408);
+            this.btnPrimeira.Name = "btnPrimeira";
+            this.btnPrimeira.Size = new System.Drawing.Size(60, 25);
+            this.btnPrimeira.TabIndex = 7;
+            this.btnPrimeira.Text = "<<";
+            this.btnPrimeira.UseVisualStyleBackColor = true;
+            this.btnPrimeira.Click += new System.EventHandler(this.btnPrimeira_Click);
+            // 
+            // btnAnterior
+            // 
+            this.btnAnterior.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnAnterior.Location = new System.Drawing.Point(78, 408);
+            this.btnAnterior.Name = "btnAnterior";
+            this.btnAnterior.Size = new System.Drawing.Size(60, 25);
+            this.btnAnterior.TabIndex = 8;
+            this.btnAnterior.Text = "<";
+            this.btnAnterior.UseVisualStyleBackColor = true;
+            this.btnAnterior.Click += new System.EventHandler(this.btnAnterior_Click);
+            // 
+            // lblPagina
+            // 
+            this.lblPagina.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblPagina.AutoSize = true;
+            this.lblPagina.Location = new System.Drawing.Point(144, 413);
+            this.lblPagina.Name = "lblPagina";
+            this.lblPagina.Size = new System.Drawing.Size(80, 13);
+            this.lblPagina.TabIndex = 9;
+            this.lblPagina.Text = "Página 1 de 1";
+            // 
+            // btnProxima
+            // 
+            this.btnProxima.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnProxima.Location = new System.Drawing.Point(240, 408);
+            this.btnProxima.Name = "btnProxima";
+            this.btnProxima.Size = new System.Drawing.Size(60, 25);
+            this.btnProxima.TabIndex = 10;
+            this.btnProxima.Text = ">";
+            this.btnProxima.UseVisualStyleBackColor = true;
+            this.btnProxima.Click += new System.EventHandler(this.btnProxima_Click);
+            // 
+            // btnUltima
+            // 
+            this.btnUltima.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnUltima.Location = new System.Drawing.Point(306, 408);
+            this.btnUltima.Name = "btnUltima";
+            this.btnUltima.Size = new System.Drawing.Size(60, 25);
+            this.btnUltima.TabIndex = 11;
+            this.btnUltima.Text = ">>";
+            this.btnUltima.UseVisualStyleBackColor = true;
+            this.btnUltima.Click += new System.EventHandler(this.btnUltima_Click);
+            // 
+            // cbItensPorPagina
+            // 
+            this.cbItensPorPagina.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbItensPorPagina.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbItensPorPagina.FormattingEnabled = true;
+            this.cbItensPorPagina.Items.AddRange(new object[] {
+            "25",
+            "50",
+            "100",
+            "Todos"});
+            this.cbItensPorPagina.Location = new System.Drawing.Point(710, 410);
+            this.cbItensPorPagina.Name = "cbItensPorPagina";
+            this.cbItensPorPagina.Size = new System.Drawing.Size(108, 21);
+            this.cbItensPorPagina.TabIndex = 12;
+            this.cbItensPorPagina.SelectedIndexChanged += new System.EventHandler(this.cbItensPorPagina_SelectedIndexChanged);
+            // 
             // EditorOrdemFabricoStocks
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(830, 444);
+            this.Controls.Add(this.cbItensPorPagina);
+            this.Controls.Add(this.btnUltima);
+            this.Controls.Add(this.btnProxima);
+            this.Controls.Add(this.lblPagina);
+            this.Controls.Add(this.btnAnterior);
+            this.Controls.Add(this.btnPrimeira);
             this.Controls.Add(this.btnImportarExcel);
             this.Controls.Add(this.btnExportarTemplateExcel);
             this.Controls.Add(this.label1);
@@ -144,5 +226,11 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnExportarTemplateExcel;
         private System.Windows.Forms.Button btnImportarExcel;
+        private System.Windows.Forms.Button btnPrimeira;
+        private System.Windows.Forms.Button btnAnterior;
+        private System.Windows.Forms.Button btnProxima;
+        private System.Windows.Forms.Button btnUltima;
+        private System.Windows.Forms.Label lblPagina;
+        private System.Windows.Forms.ComboBox cbItensPorPagina;
     }
 }
