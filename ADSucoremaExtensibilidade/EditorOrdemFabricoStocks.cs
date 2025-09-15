@@ -545,6 +545,8 @@ namespace ADSucoremaExtensibilidade
                     var descricao = infoArtigo.Descricao;
                     var codigoFamilia = infoArtigo.Familia;
 
+
+                    /*
                     IntBELinhaDocumentoInterno linha = new IntBELinhaDocumentoInterno()
                     {
                         Artigo = artigo,
@@ -556,8 +558,11 @@ namespace ADSucoremaExtensibilidade
                         PrecoUnitario = precoUnitario,
                         INV_EstadoOrigem = "DISP"
                     };
+                    */
+                    BSO.Internos.Documentos.AdicionaLinha(documento, artigo);
 
-                    documento.Linhas.Insere(linha);
+
+                    //documento.Linhas.Insere(linha);
                 }
             }
 
