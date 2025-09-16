@@ -49,8 +49,8 @@
             // 
             this.dgvOrdensFabrico.AllowUserToAddRows = false;
             this.dgvOrdensFabrico.AllowUserToDeleteRows = false;
-            this.dgvOrdensFabrico.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.dgvOrdensFabrico.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgvOrdensFabrico.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgvOrdensFabrico.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -141,16 +141,6 @@
             this.btnAnterior.UseVisualStyleBackColor = true;
             this.btnAnterior.Click += new System.EventHandler(this.btnAnterior_Click);
             // 
-            // lblPagina
-            // 
-            this.lblPagina.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblPagina.AutoSize = true;
-            this.lblPagina.Location = new System.Drawing.Point(144, 413);
-            this.lblPagina.Name = "lblPagina";
-            this.lblPagina.Size = new System.Drawing.Size(80, 13);
-            this.lblPagina.TabIndex = 9;
-            this.lblPagina.Text = "Página 1 de 1";
-            // 
             // btnProxima
             // 
             this.btnProxima.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -173,16 +163,26 @@
             this.btnUltima.UseVisualStyleBackColor = true;
             this.btnUltima.Click += new System.EventHandler(this.btnUltima_Click);
             // 
+            // lblPagina
+            // 
+            this.lblPagina.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblPagina.AutoSize = true;
+            this.lblPagina.Location = new System.Drawing.Point(144, 413);
+            this.lblPagina.Name = "lblPagina";
+            this.lblPagina.Size = new System.Drawing.Size(73, 13);
+            this.lblPagina.TabIndex = 9;
+            this.lblPagina.Text = "Página 1 de 1";
+            // 
             // cbItensPorPagina
             // 
             this.cbItensPorPagina.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cbItensPorPagina.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbItensPorPagina.FormattingEnabled = true;
             this.cbItensPorPagina.Items.AddRange(new object[] {
+            "Todos",
             "25",
             "50",
-            "100",
-            "Todos"});
+            "100"});
             this.cbItensPorPagina.Location = new System.Drawing.Point(710, 410);
             this.cbItensPorPagina.Name = "cbItensPorPagina";
             this.cbItensPorPagina.Size = new System.Drawing.Size(108, 21);

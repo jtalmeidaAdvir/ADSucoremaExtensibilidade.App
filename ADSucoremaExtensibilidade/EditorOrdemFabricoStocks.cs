@@ -206,69 +206,65 @@ namespace ADSucoremaExtensibilidade
             var num = todasOrdemFabricoProjeto.NumLinhas();
             if (num == 0) return dt;
 
-            // Cache para evitar múltiplas consultas aos mesmos dados
-            var cacheArtigos = new Dictionary<string, object>();
-            var cacheFamilias = new Dictionary<string, string>();
-
-            // Criar lista de IDs das ordens de fabrico para consulta em lote
+            // Criar lista de IDs das ordens de fabrico para consulta em lote (LIMITADO A 1000)
             var idsOrdens = new List<string>();
             todasOrdemFabricoProjeto.Inicio();
-            for (int i = 0; i < num; i++)
+            for (int i = 0; i < Math.Min(num, 1000); i++) // Limitar para evitar consultas muito grandes
             {
                 idsOrdens.Add(todasOrdemFabricoProjeto.DaValor<string>("IDOrdemFabrico"));
                 todasOrdemFabricoProjeto.Seguinte();
             }
 
-            // Consulta em lote para operações
+            // CONSULTA ULTRA-OTIMIZADA com índices e TOP
             var idsOrdensStr = string.Join(",", idsOrdens);
-            var queryOperacoesBatch = $@"SELECT IDOrdemFabrico, SubContratacao, Descricao 
-                                        FROM GPR_OrdemFabricoOperacoes 
-                                        WHERE IDOrdemFabrico IN ({idsOrdensStr}) AND SubContratacao = 1";
-            var resultOperacoesBatch = BSO.Consulta(queryOperacoesBatch);
+            var queryCompleta = $@"
+                WITH OrdemFabricoData AS (
+                    SELECT TOP 1000
+                        G.IDOrdemFabrico,
+                        G.OrdemFabrico,
+                        G.Artigo,
+                        G.QtFabricada,
+                        ISNULL(G.CustoMateriaisReal, 0) as CustoMateriaisReal,
+                        ISNULL(G.CustoTransformacaoReal, 0) as CustoTransformacaoReal,
+                        ISNULL(G.CustoSubprodutosReal, 0) as CustoSubprodutosReal,
+                        G.CDU_CodigoProjeto,
+                        ISNULL(A.Familia, '') as Familia,
+                        ISNULL(A.UnidadeBase, 'UN') as UnidadeBase,
+                        ISNULL(F.Descricao, A.Familia) as DescricaoFamilia
+                    FROM GPR_OrdemFabrico G WITH(NOLOCK)
+                    LEFT JOIN Artigo A WITH(NOLOCK) ON G.Artigo = A.Artigo
+                    LEFT JOIN Familias F WITH(NOLOCK) ON A.Familia = F.Familia
+                    WHERE G.IDOrdemFabrico IN ({idsOrdensStr})
+                ),
+                OperacoesData AS (
+                    SELECT 
+                        IDOrdemFabrico,
+                        CAST(SubContratacao as bit) as SubContratacao,
+                        ISNULL(Descricao, '') as Descricao
+                    FROM GPR_OrdemFabricoOperacoes WITH(NOLOCK)
+                    WHERE IDOrdemFabrico IN ({idsOrdensStr}) 
+                      AND SubContratacao = 1
+                )
+                SELECT 
+                    O.IDOrdemFabrico,
+                    O.OrdemFabrico,
+                    O.Artigo,
+                    ISNULL(O.QtFabricada, '0') as QtFabricada,
+                    O.CustoMateriaisReal,
+                    O.CustoTransformacaoReal,
+                    O.CustoSubprodutosReal,
+                    ISNULL(O.CDU_CodigoProjeto, '') as CDU_CodigoProjeto,
+                    O.DescricaoFamilia as Familia,
+                    O.UnidadeBase,
+                    ISNULL(Op.SubContratacao, 0) as SubContratacao,
+                    ISNULL(Op.Descricao, '') as Descricao,
+                    0 as RececionadoVFS, -- Calcular posteriormente se necessário
+                    0 as RececionadoVFA  -- Calcular posteriormente se necessário
+                FROM OrdemFabricoData O
+                INNER JOIN OperacoesData Op ON O.IDOrdemFabrico = Op.IDOrdemFabrico
+                ORDER BY O.OrdemFabrico";
 
-            // Criar dicionário das operações por ID
-            var operacoesPorId = new Dictionary<string, List<(bool SubContratacao, string Descricao)>>();
-            var numOp = resultOperacoesBatch.NumLinhas();
-            resultOperacoesBatch.Inicio();
-            for (int i = 0; i < numOp; i++)
-            {
-                var idOrdem = resultOperacoesBatch.DaValor<string>("IDOrdemFabrico");
-                if (!operacoesPorId.ContainsKey(idOrdem))
-                    operacoesPorId[idOrdem] = new List<(bool, string)>();
-
-                operacoesPorId[idOrdem].Add((
-                    resultOperacoesBatch.DaValor<bool>("SubContratacao"),
-                    resultOperacoesBatch.DaValor<string>("Descricao")
-                ));
-                resultOperacoesBatch.Seguinte();
-            }
-
-            // Consulta em lote para ordens de fabrico
-            var queryOrdensBatch = $@"SELECT IDOrdemFabrico, OrdemFabrico, Artigo, QtFabricada, 
-                                      CustoMateriaisReal, CustoTransformacaoReal, CustoSubprodutosReal, CDU_CodigoProjeto 
-                                      FROM GPR_OrdemFabrico 
-                                      WHERE IDOrdemFabrico IN ({idsOrdensStr})";
-            var resultOrdensBatch = BSO.Consulta(queryOrdensBatch);
-
-            // Criar dicionário das ordens por ID
-            var ordensPorId = new Dictionary<string, Dictionary<string, object>>();
-            var numOrdens = resultOrdensBatch.NumLinhas();
-            resultOrdensBatch.Inicio();
-            for (int i = 0; i < numOrdens; i++)
-            {
-                var idOrdem = resultOrdensBatch.DaValor<string>("IDOrdemFabrico");
-                ordensPorId[idOrdem] = new Dictionary<string, object>
-                {
-                    ["OrdemFabrico"] = resultOrdensBatch.DaValor<string>("OrdemFabrico"),
-                    ["Artigo"] = resultOrdensBatch.DaValor<string>("Artigo"),
-                    ["QtFabricada"] = resultOrdensBatch.DaValor<string>("QtFabricada"),
-                    ["CustoMateriaisReal"] = resultOrdensBatch.DaValor<object>("CustoMateriaisReal"),
-                    ["CustoTransformacaoReal"] = resultOrdensBatch.DaValor<object>("CustoTransformacaoReal"),
-                    ["CustoSubprodutosReal"] = resultOrdensBatch.DaValor<object>("CustoSubprodutosReal"),
-                    ["CDU_CodigoProjeto"] = resultOrdensBatch.DaValor<string>("CDU_CodigoProjeto")
-                };
-                resultOrdensBatch.Seguinte();
-            }
+            var resultCompleto = BSO.Consulta(queryCompleta);
 
             // Criar set de artigos existentes no documento para verificação rápida
             var artigosExistentesNoDoc = new HashSet<string>();
@@ -277,62 +273,56 @@ namespace ADSucoremaExtensibilidade
                 artigosExistentesNoDoc.Add(this.DocumentoStock.Linhas.GetEdita(y).Artigo);
             }
 
-            // Processar cada ordem
-            foreach (var idOrdem in idsOrdens)
+            // Processar resultados - OTIMIZADO
+            var numResultados = Math.Min(resultCompleto.NumLinhas(), 1000);
+            resultCompleto.Inicio();
+
+            for (int i = 0; i < numResultados; i++)
             {
-                if (!operacoesPorId.ContainsKey(idOrdem) || !ordensPorId.ContainsKey(idOrdem))
-                    continue;
-
-                var dadosOrdem = ordensPorId[idOrdem];
-                var operacoes = operacoesPorId[idOrdem];
-
-                foreach (var operacao in operacoes)
+                try
                 {
-                    decimal SafeGetDecimal(object value) =>
-                        value == null || value == DBNull.Value ? 0 : Convert.ToDecimal(value);
+                    var custoMateriais = Convert.ToDecimal(resultCompleto.DaValor<object>("CustoMateriaisReal") ?? 0);
+                    var custoTransformacao = Convert.ToDecimal(resultCompleto.DaValor<object>("CustoTransformacaoReal") ?? 0);
+                    var custoSubprodutos = Convert.ToDecimal(resultCompleto.DaValor<object>("CustoSubprodutosReal") ?? 0);
+                    var total = custoMateriais + custoTransformacao + custoSubprodutos;
 
-                    decimal custoMateriais = SafeGetDecimal(dadosOrdem["CustoMateriaisReal"]);
-                    decimal custoTransformacao = SafeGetDecimal(dadosOrdem["CustoTransformacaoReal"]);
-                    decimal custoSubprodutos = SafeGetDecimal(dadosOrdem["CustoSubprodutosReal"]);
-                    decimal total = custoMateriais + custoTransformacao + custoSubprodutos;
+                    var ordemFabricoAtual = resultCompleto.DaValor<string>("OrdemFabrico") ?? "";
+                    var artigoAtual = resultCompleto.DaValor<string>("Artigo") ?? "";
+                    var isSubContratacao = Convert.ToBoolean(resultCompleto.DaValor<object>("SubContratacao") ?? false);
 
-                    var ordemFabricoAtual = dadosOrdem["OrdemFabrico"].ToString();
-                    var artigoAtual = dadosOrdem["Artigo"].ToString();
-
-                    // Verificar se existe no documento usando HashSet (O(1))
-                    bool existeNoDocumento = artigosExistentesNoDoc.Contains(artigoAtual);
-
-                    // Verificar receção com cache
-                    bool jaRececionado = VerificarRececaoComCache(operacao.SubContratacao, ordemFabricoAtual, artigoAtual);
-
-                    if (!jaRececionado && !existeNoDocumento)
+                    // Calcular receção apenas quando necessário (lazy loading)
+                    bool jaRececionado = false;
+                    if (isSubContratacao && !string.IsNullOrEmpty(ordemFabricoAtual))
                     {
-                        jaRececionado = false;
+                        jaRececionado = VerificarRececaoComCache(true, ordemFabricoAtual, artigoAtual);
                     }
-                    else if (!jaRececionado && existeNoDocumento)
+                    else if (!string.IsNullOrEmpty(artigoAtual))
                     {
-                        jaRececionado = false;
+                        jaRececionado = VerificarRececaoComCache(false, ordemFabricoAtual, artigoAtual);
                     }
 
                     dt.Rows.Add(
                         false,
                         ordemFabricoAtual,
                         artigoAtual,
-                        "", // Família será preenchida abaixo
-                        "UN",
-                        dadosOrdem["QtFabricada"].ToString(),
-                        0.000,
+                        resultCompleto.DaValor<string>("Familia") ?? "",
+                        resultCompleto.DaValor<string>("UnidadeBase") ?? "UN",
+                        resultCompleto.DaValor<string>("QtFabricada") ?? "0",
+                        0.000m,
                         total,
-                        operacao.Descricao,
-                        dadosOrdem["CDU_CodigoProjeto"].ToString(),
+                        resultCompleto.DaValor<string>("Descricao") ?? "",
+                        resultCompleto.DaValor<string>("CDU_CodigoProjeto") ?? "",
                         jaRececionado,
-                        operacao.SubContratacao
+                        isSubContratacao
                     );
-
-                    // Obter família com cache
-                    string descricaoFamilia = ObterFamiliaComCache(artigoAtual, cacheArtigos, cacheFamilias);
-                    dt.Rows[dt.Rows.Count - 1]["Familia"] = descricaoFamilia;
                 }
+                catch (Exception ex)
+                {
+                    // Log do erro e continuar processamento
+                    System.Diagnostics.Debug.WriteLine($"Erro ao processar linha {i}: {ex.Message}");
+                }
+
+                resultCompleto.Seguinte();
             }
 
             return dt;
@@ -637,34 +627,35 @@ namespace ADSucoremaExtensibilidade
 
         private StdBELista GetArtigosEletricos(string codigoProjeto)
         {
-            var query = $@"SELECT 
+            var query = $@"SELECT TOP 1000
                             LC.Artigo,
-                            LC.Descricao,
-                            LC.Lote,
-                            LC.Quantidade,
-                            A.Familia,
+                            ISNULL(LC.Descricao, '') as Descricao,
+                            ISNULL(LC.Lote, '') as Lote,
+                            ISNULL(LC.Quantidade, 0) as Quantidade,
+                            ISNULL(A.Familia, '') as Familia,
                             CC.NumDoc,
                             CC.Serie,
                             CO.Codigo,
-                            OFA.OrdemFabrico,
-                            LC.PrecUnit,
-                            LC.PrecoLiquido
+                            ISNULL(OFA.OrdemFabrico, '') as OrdemFabrico,
+                            ISNULL(LC.PrecUnit, 0) as PrecUnit,
+                            ISNULL(LC.PrecoLiquido, 0) as PrecoLiquido
                         FROM 
-                            CabecCompras AS CC
+                            CabecCompras AS CC WITH(NOLOCK)
                         INNER JOIN 
-                            LinhasCompras AS LC ON CC.Id = LC.IdCabecCompras
+                            LinhasCompras AS LC WITH(NOLOCK) ON CC.Id = LC.IdCabecCompras
                         INNER JOIN 
-                            Artigo AS A ON LC.Artigo = A.Artigo
+                            Artigo AS A WITH(NOLOCK) ON LC.Artigo = A.Artigo
                         INNER JOIN 
-                            COP_Obras AS CO ON LC.ObraID = CO.ID
+                            COP_Obras AS CO WITH(NOLOCK) ON LC.ObraID = CO.ID
                         LEFT JOIN 
-                            GPR_OrdemFabrico AS OFA ON LC.Artigo = OFA.Artigo
+                            GPR_OrdemFabrico AS OFA WITH(NOLOCK) ON LC.Artigo = OFA.Artigo
                         WHERE 
                             CC.TipoDoc = 'ECF'
                             AND LC.Artigo IS NOT NULL
-                            AND (A.Familia = '004' OR A.Familia = '024')
+                            AND A.Familia IN ('004', '024')
                             AND LC.ObraID IS NOT NULL
-                            AND CO.Codigo = '{codigoProjeto}'";
+                            AND CO.Codigo = '{codigoProjeto}'
+                        ORDER BY LC.Artigo";
 
             return BSO.Consulta(query);
         }
@@ -812,19 +803,22 @@ namespace ADSucoremaExtensibilidade
 
         private bool VerificarSeArtigosEletricosJaInseridos(string projeto)
         {
-            var queryVerificacao = $@"SELECT COUNT(*) AS count
-                                   FROM CabecInternos CI
-                                   JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
-                                   JOIN Artigo A ON LI.Artigo = A.Artigo
-                                   JOIN GPR_OrdemFabrico GF ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
-                                   WHERE CI.TipoDoc = 'SOF' 
-                                     AND GF.CDU_CodigoProjeto = '{projeto}'
-                                     AND (A.Familia = '001' OR A.Familia = '002' OR A.Familia = '003' OR A.Familia = '004' OR A.Familia = '005' OR A.Familia = '006' OR A.Familia = '011' OR A.Familia = '024')";
+            // Usar EXISTS para melhor performance
+            var queryVerificacao = $@"SELECT CASE WHEN EXISTS (
+                                       SELECT 1
+                                       FROM CabecInternos CI
+                                       JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
+                                       JOIN Artigo A ON LI.Artigo = A.Artigo
+                                       JOIN GPR_OrdemFabrico GF ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
+                                       WHERE CI.TipoDoc = 'SOF' 
+                                         AND GF.CDU_CodigoProjeto = '{projeto}'
+                                         AND A.Familia IN ('001','002','003','004','005','006','011','024')
+                                   ) THEN 1 ELSE 0 END AS existe";
 
             var resultado = BSO.Consulta(queryVerificacao);
             resultado.Inicio();
 
-            return resultado.DaValor<int>("count") > 0;
+            return resultado.DaValor<int>("existe") == 1;
         }
 
         private System.Data.DataTable ConvertArtigosEletricosToDataTable(StdBELista artigosEletricos)
@@ -845,8 +839,77 @@ namespace ADSucoremaExtensibilidade
             dt.Columns.Add("SubContratacao", typeof(bool));
 
             var num = artigosEletricos.NumLinhas();
-            artigosEletricos.Inicio();
+            if (num == 0) return dt;
 
+            // Coletar todos os artigos para consulta em lote
+            var todosArtigos = new List<string>();
+            artigosEletricos.Inicio();
+            for (int i = 0; i < num; i++)
+            {
+                todosArtigos.Add(artigosEletricos.DaValor<string>("Artigo"));
+                artigosEletricos.Seguinte();
+            }
+
+            // Consulta otimizada em lote para artigos, famílias e receções
+            var artigosStr = string.Join("','", todosArtigos);
+            var queryCompleta = $@"
+                WITH ArtigosData AS (
+                    SELECT 
+                        A.Artigo,
+                        A.UnidadeBase,
+                        A.Familia,
+                        F.Descricao as DescricaoFamilia,
+                        CASE WHEN A.Familia = '011' THEN 1 ELSE 0 END as IsServico
+                    FROM Artigo A
+                    LEFT JOIN Familias F ON A.Familia = F.Familia
+                    WHERE A.Artigo IN ('{artigosStr}')
+                ),
+                RececaoVFA AS (
+                    SELECT DISTINCT L.Artigo
+                    FROM LinhasCompras L
+                    INNER JOIN CabecCompras C ON L.IdCabecCompras = C.ID
+                    INNER JOIN COP_Obras CO ON L.ObraID = CO.ID
+                    WHERE L.Artigo IN ('{artigosStr}')
+                      AND C.TipoDoc = 'VFA' 
+                      AND CO.Codigo = '{projeto}'
+                )
+                SELECT 
+                    A.Artigo,
+                    A.UnidadeBase,
+                    ISNULL(A.DescricaoFamilia, A.Familia) as Familia,
+                    A.IsServico,
+                    CASE WHEN R.Artigo IS NOT NULL THEN 1 ELSE 0 END as Rececionado
+                FROM ArtigosData A
+                LEFT JOIN RececaoVFA R ON A.Artigo = R.Artigo";
+
+            var resultCompleto = BSO.Consulta(queryCompleta);
+
+            // Criar dicionários para lookup rápido
+            var dadosArtigos = new Dictionary<string, (string Unidade, string Familia, bool IsServico, bool Rececionado)>();
+            var numResultados = resultCompleto.NumLinhas();
+            resultCompleto.Inicio();
+
+            for (int i = 0; i < numResultados; i++)
+            {
+                var artigo = resultCompleto.DaValor<string>("Artigo");
+                dadosArtigos[artigo] = (
+                    resultCompleto.DaValor<string>("UnidadeBase") ?? "UN",
+                    resultCompleto.DaValor<string>("Familia") ?? "",
+                    resultCompleto.DaValor<int>("IsServico") == 1,
+                    resultCompleto.DaValor<int>("Rececionado") == 1
+                );
+                resultCompleto.Seguinte();
+            }
+
+            // Criar set de artigos existentes no documento para verificação rápida
+            var artigosExistentesNoDoc = new HashSet<string>();
+            for (int y = 1; y <= this.DocumentoStock.Linhas.NumItens; y++)
+            {
+                artigosExistentesNoDoc.Add(this.DocumentoStock.Linhas.GetEdita(y).Artigo);
+            }
+
+            // Processar dados dos artigos elétricos
+            artigosEletricos.Inicio();
             for (int i = 0; i < num; i++)
             {
                 var artigo = artigosEletricos.DaValor<string>("Artigo");
@@ -856,84 +919,24 @@ namespace ADSucoremaExtensibilidade
                 var precoUnitario = Math.Abs(Convert.ToDouble(artigosEletricos.DaValor<string>("PrecUnit")));
                 var precoLiquido = Math.Abs(Convert.ToDouble(artigosEletricos.DaValor<string>("PrecoLiquido")));
 
-                // Verificar se o artigo já existe no DocumentoStock.Linhas
-                bool existe = false;
-                for (int y = 1; y <= this.DocumentoStock.Linhas.NumItens; y++)
-                {
-                    if (this.DocumentoStock.Linhas.GetEdita(y).Artigo == artigo)
-                    {
-                        existe = true;
-                        break;
-                    }
-                }
-
-                var infoArtigo = BSO.Base.Artigos.Edita(artigo);
-                var unidade = infoArtigo?.UnidadeBase ?? "UN";
-
-                // Buscar a descrição da família
-                string descricaoFamilia = "";
-                bool isServico = false;
-                if (infoArtigo != null && !string.IsNullOrEmpty(infoArtigo.Familia))
-                {
-                    isServico = infoArtigo.Familia == "011"; // Verificar se é serviço
-
-                    var queryFamilia = $"SELECT Descricao FROM Familias WHERE Familia = '{infoArtigo.Familia}'";
-                    var resultFamilia = BSO.Consulta(queryFamilia);
-
-                    if (resultFamilia.NumLinhas() > 0)
-                    {
-                        descricaoFamilia = resultFamilia.DaValor<string>("Descricao");
-                    }
-                    else
-                    {
-                        descricaoFamilia = infoArtigo.Familia; // Fallback para o código se não encontrar descrição
-                    }
-                }
-
-                // Verificar se o artigo foi rececionado nas VFA
-                bool jaRececionado = false;
-                var queryRececaoVFA = $@"SELECT 
-                                        c.NumDoc,
-                                        L.Artigo,
-                                        L.Unidade,
-                                        L.PrecUnit,
-                                        L.PrecoLiquido,
-                                        L.Quantidade,
-                                        L.IdCabecCompras,
-                                        L.ObraID,
-                                        CO.Codigo,
-                                        C.*
-                                    FROM 
-                                        LinhasCompras L
-                                    INNER JOIN 
-                                        CabecCompras C
-                                        ON L.IdCabecCompras = C.ID
-                                    INNER JOIN 
-                                        COP_Obras AS CO ON L.ObraID = CO.ID
-                                    WHERE 
-                                        L.Artigo = '{artigo}' 
-                                        AND C.TipoDoc = 'VFA'
-                                        AND CO.Codigo = '{projeto}';";
-
-                var resultVFA = BSO.Consulta(queryRececaoVFA);
-                if (resultVFA.NumLinhas() > 0)
-                {
-                    jaRececionado = true;
-                }
+                // Usar dados do lookup
+                var dadosArtigo = dadosArtigos.ContainsKey(artigo)
+                    ? dadosArtigos[artigo]
+                    : ("UN", "", false, false);
 
                 dt.Rows.Add(
                     false, // Checkbox sempre false inicialmente
                     ordemFabrico ?? "",
                     artigo,
-                    descricaoFamilia,
-                    unidade,
+                    dadosArtigo.Item2, // Familia
+                    dadosArtigo.Item1, // Unidade
                     quantidade,
                     precoLiquido,
                     precoUnitario,
                     descricao,
                     projeto,
-                    jaRececionado, // Usar a verificação real das VFA
-                    isServico // Marcar se é serviço para controle
+                    dadosArtigo.Item4, // Rececionado
+                    dadosArtigo.Item3  // IsServico
                 );
 
                 artigosEletricos.Seguinte();
@@ -964,24 +967,96 @@ namespace ADSucoremaExtensibilidade
 
         private bool VerificarArtigoExisteEmSOF(string artigo)
         {
+            if (string.IsNullOrEmpty(artigo)) return false;
+
             if (_cacheArtigosSOF.ContainsKey(artigo))
                 return _cacheArtigosSOF[artigo];
 
-            var query = $@"SELECT COUNT(*) AS count
-                          FROM CabecInternos CI
-                          JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
-                          JOIN [GPR_OrdemFabrico] GF ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
-                          WHERE CI.TipoDoc = 'SOF' 
-                            AND GF.CDU_CodigoProjeto = '{projeto}'
-                            AND LI.Artigo = '{artigo}'
-                            AND IDOperadorGPR > 0";
+            try
+            {
+                // Usar EXISTS com NOLOCK para melhor performance
+                var query = $@"SELECT CASE WHEN EXISTS (
+                                  SELECT TOP 1 1 
+                                  FROM CabecInternos CI WITH(NOLOCK)
+                                  JOIN LinhasInternos LI WITH(NOLOCK) ON CI.Id = LI.IdCabecInternos
+                                  JOIN GPR_OrdemFabrico GF WITH(NOLOCK) ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
+                                  WHERE CI.TipoDoc = 'SOF' 
+                                    AND GF.CDU_CodigoProjeto = '{projeto}'
+                                    AND LI.Artigo = '{artigo}'
+                                    AND CI.IDOperadorGPR > 0
+                              ) THEN 1 ELSE 0 END AS existe";
 
-            var response = BSO.Consulta(query);
-            response.Inicio();
+                var response = BSO.Consulta(query);
+                if (response.NumLinhas() > 0)
+                {
+                    response.Inicio();
+                    bool existe = response.DaValor<int>("existe") == 1;
+                    _cacheArtigosSOF[artigo] = existe;
+                    return existe;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro ao verificar artigo {artigo}: {ex.Message}");
+            }
 
-            bool existe = response.DaValor<int>("count") > 0;
-            _cacheArtigosSOF[artigo] = existe;
-            return existe;
+            _cacheArtigosSOF[artigo] = false;
+            return false;
+        }
+
+        // Método otimizado para verificar múltiplos artigos de uma vez
+        private Dictionary<string, bool> VerificarArtigosExistemEmSOFBatch(List<string> artigos)
+        {
+            var resultado = new Dictionary<string, bool>();
+            var artigosParaConsultar = new List<string>();
+
+            // Verificar cache primeiro
+            foreach (var artigo in artigos)
+            {
+                if (_cacheArtigosSOF.ContainsKey(artigo))
+                {
+                    resultado[artigo] = _cacheArtigosSOF[artigo];
+                }
+                else
+                {
+                    artigosParaConsultar.Add(artigo);
+                }
+            }
+
+            // Consultar artigos não encontrados no cache
+            if (artigosParaConsultar.Count > 0)
+            {
+                var artigosStr = string.Join("','", artigosParaConsultar);
+                var query = $@"SELECT DISTINCT LI.Artigo
+                              FROM CabecInternos CI
+                              JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
+                              JOIN [GPR_OrdemFabrico] GF ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
+                              WHERE CI.TipoDoc = 'SOF' 
+                                AND GF.CDU_CodigoProjeto = '{projeto}'
+                                AND LI.Artigo IN ('{artigosStr}')
+                                AND CI.IDOperadorGPR > 0";
+
+                var response = BSO.Consulta(query);
+                var artigosExistentes = new HashSet<string>();
+
+                var numResultados = response.NumLinhas();
+                response.Inicio();
+                for (int i = 0; i < numResultados; i++)
+                {
+                    artigosExistentes.Add(response.DaValor<string>("Artigo"));
+                    response.Seguinte();
+                }
+
+                // Processar resultados e atualizar cache
+                foreach (var artigo in artigosParaConsultar)
+                {
+                    bool existe = artigosExistentes.Contains(artigo);
+                    resultado[artigo] = existe;
+                    _cacheArtigosSOF[artigo] = existe;
+                }
+            }
+
+            return resultado;
         }
 
         private void AplicarPaginacao()
