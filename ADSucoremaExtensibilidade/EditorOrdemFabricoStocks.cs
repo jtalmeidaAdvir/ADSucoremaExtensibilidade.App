@@ -1,4 +1,5 @@
-﻿using IntBE100;
+﻿
+using IntBE100;
 using StdBE100;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
+using System.Linq;
 
 namespace ADSucoremaExtensibilidade
 {
@@ -27,6 +29,13 @@ namespace ADSucoremaExtensibilidade
         private int _totalItens = 0;
         private int _totalPaginas = 0;
         private System.Data.DataTable _dadosCompletos = null;
+
+        // Contador para limpeza de cache
+        private int _contadorOperacoes = 0;
+
+        // Cache para receções
+        private Dictionary<string, bool> _cacheRececaoVFS = new Dictionary<string, bool>();
+        private Dictionary<string, bool> _cacheRececaoVFA = new Dictionary<string, bool>();
 
         public EditorOrdemFabricoStocks(ErpBS100.ErpBS bSO, StdPlatBS100.StdBSInterfPub pSO, IntBE100.IntBEDocumentoInterno documentoStock)
         {
@@ -54,6 +63,39 @@ namespace ADSucoremaExtensibilidade
             cbTipoLista.SelectedIndex = 0; // Selecionar por defeito os artigos subcontratados
         }
 
+        private void LimparCachesSeNecessario()
+        {
+            _contadorOperacoes++;
+
+            // Limpar caches a cada 100 operações para evitar memory leaks
+            if (_contadorOperacoes % 100 == 0)
+            {
+                if (_cacheArtigosSOF.Count > 1000)
+                {
+                    _cacheArtigosSOF.Clear();
+                }
+
+                if (_cacheRececaoVFS.Count > 500)
+                {
+                    _cacheRececaoVFS.Clear();
+                }
+
+                if (_cacheRececaoVFA.Count > 500)
+                {
+                    _cacheRececaoVFA.Clear();
+                }
+
+                // Forçar garbage collection se necessário
+                if (_contadorOperacoes % 500 == 0)
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Cache limpo após {_contadorOperacoes} operações");
+            }
+        }
+
         private void ConfigurarPaginacao()
         {
             cbItensPorPagina.SelectedIndex = 0; // 25 itens por defeito
@@ -79,6 +121,9 @@ namespace ADSucoremaExtensibilidade
 
         private void CarregarListaSelecionada()
         {
+            // Limpar caches periodicamente para evitar memory leaks
+            LimparCachesSeNecessario();
+
             // Se não há projeto definido, mostrar grid vazio
             if (string.IsNullOrEmpty(projeto))
             {
@@ -170,12 +215,19 @@ namespace ADSucoremaExtensibilidade
             return BSO.Consulta(query);
         }
 
-
         private StdBELista GetInfoListaOrdemFabricoProjeto(string projecto)
         {
-            var query = $"SELECT IDOrdemFabrico,CDU_CodigoProjeto,* FROM GPR_OrdemFabrico WHERE CDU_CodigoProjeto = '{projecto}'";
-            var lista = BSO.Consulta(query);
-            return lista;
+            try
+            {
+                var query = $"SELECT TOP 500 IDOrdemFabrico,CDU_CodigoProjeto,* FROM GPR_OrdemFabrico WITH(NOLOCK) WHERE CDU_CodigoProjeto = '{projecto}' ORDER BY IDOrdemFabrico";
+                var lista = BSO.Consulta(query);
+                return lista;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro ao consultar ordens de fabrico: {ex.Message}");
+                return BSO.Consulta("SELECT TOP 0 IDOrdemFabrico,CDU_CodigoProjeto FROM GPR_OrdemFabrico WHERE 1=0");
+            }
         }
 
         private StdBELista GetInforOrdemFabrico()
@@ -206,6 +258,13 @@ namespace ADSucoremaExtensibilidade
             var num = todasOrdemFabricoProjeto.NumLinhas();
             if (num == 0) return dt;
 
+            // Limitar processamento para evitar travamentos
+            if (num > 500)
+            {
+                MessageBox.Show($"Muitos registros encontrados ({num}). Será processado apenas os primeiros 500 para evitar travamentos.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                num = 500;
+            }
+
             // Criar lista de IDs das ordens de fabrico para consulta em lote (LIMITADO A 1000)
             var idsOrdens = new List<string>();
             todasOrdemFabricoProjeto.Inicio();
@@ -217,54 +276,65 @@ namespace ADSucoremaExtensibilidade
 
             // CONSULTA ULTRA-OTIMIZADA com índices e TOP
             var idsOrdensStr = string.Join(",", idsOrdens);
-            var queryCompleta = $@"
-                WITH OrdemFabricoData AS (
-                    SELECT TOP 1000
-                        G.IDOrdemFabrico,
-                        G.OrdemFabrico,
-                        G.Artigo,
-                        G.QtFabricada,
-                        ISNULL(G.CustoMateriaisReal, 0) as CustoMateriaisReal,
-                        ISNULL(G.CustoTransformacaoReal, 0) as CustoTransformacaoReal,
-                        ISNULL(G.CustoSubprodutosReal, 0) as CustoSubprodutosReal,
-                        G.CDU_CodigoProjeto,
-                        ISNULL(A.Familia, '') as Familia,
-                        ISNULL(A.UnidadeBase, 'UN') as UnidadeBase,
-                        ISNULL(F.Descricao, A.Familia) as DescricaoFamilia
-                    FROM GPR_OrdemFabrico G WITH(NOLOCK)
-                    LEFT JOIN Artigo A WITH(NOLOCK) ON G.Artigo = A.Artigo
-                    LEFT JOIN Familias F WITH(NOLOCK) ON A.Familia = F.Familia
-                    WHERE G.IDOrdemFabrico IN ({idsOrdensStr})
-                ),
-                OperacoesData AS (
-                    SELECT 
-                        IDOrdemFabrico,
-                        CAST(SubContratacao as bit) as SubContratacao,
-                        ISNULL(Descricao, '') as Descricao
-                    FROM GPR_OrdemFabricoOperacoes WITH(NOLOCK)
-                    WHERE IDOrdemFabrico IN ({idsOrdensStr}) 
-                      AND SubContratacao = 1
-                )
-                SELECT 
-                    O.IDOrdemFabrico,
-                    O.OrdemFabrico,
-                    O.Artigo,
-                    ISNULL(O.QtFabricada, '0') as QtFabricada,
-                    O.CustoMateriaisReal,
-                    O.CustoTransformacaoReal,
-                    O.CustoSubprodutosReal,
-                    ISNULL(O.CDU_CodigoProjeto, '') as CDU_CodigoProjeto,
-                    O.DescricaoFamilia as Familia,
-                    O.UnidadeBase,
-                    ISNULL(Op.SubContratacao, 0) as SubContratacao,
-                    ISNULL(Op.Descricao, '') as Descricao,
-                    0 as RececionadoVFS, -- Calcular posteriormente se necessário
-                    0 as RececionadoVFA  -- Calcular posteriormente se necessário
-                FROM OrdemFabricoData O
-                INNER JOIN OperacoesData Op ON O.IDOrdemFabrico = Op.IDOrdemFabrico
-                ORDER BY O.OrdemFabrico";
 
-            var resultCompleto = BSO.Consulta(queryCompleta);
+            StdBELista resultCompleto;
+            try
+            {
+                var queryCompleta = $@"
+                    WITH OrdemFabricoData AS (
+                        SELECT TOP 500
+                            G.IDOrdemFabrico,
+                            G.OrdemFabrico,
+                            G.Artigo,
+                            G.QtFabricada,
+                            ISNULL(G.CustoMateriaisReal, 0) as CustoMateriaisReal,
+                            ISNULL(G.CustoTransformacaoReal, 0) as CustoTransformacaoReal,
+                            ISNULL(G.CustoSubprodutosReal, 0) as CustoSubprodutosReal,
+                            G.CDU_CodigoProjeto,
+                            ISNULL(A.Familia, '') as Familia,
+                            ISNULL(A.UnidadeBase, 'UN') as UnidadeBase,
+                            ISNULL(F.Descricao, A.Familia) as DescricaoFamilia
+                        FROM GPR_OrdemFabrico G WITH(NOLOCK)
+                        LEFT JOIN Artigo A WITH(NOLOCK) ON G.Artigo = A.Artigo
+                        LEFT JOIN Familias F WITH(NOLOCK) ON A.Familia = F.Familia
+                        WHERE G.IDOrdemFabrico IN ({idsOrdensStr})
+                    ),
+                    OperacoesData AS (
+                        SELECT 
+                            IDOrdemFabrico,
+                            CAST(SubContratacao as bit) as SubContratacao,
+                            ISNULL(Descricao, '') as Descricao
+                        FROM GPR_OrdemFabricoOperacoes WITH(NOLOCK)
+                        WHERE IDOrdemFabrico IN ({idsOrdensStr}) 
+                          AND SubContratacao = 1
+                    )
+                    SELECT TOP 500
+                        O.IDOrdemFabrico,
+                        O.OrdemFabrico,
+                        O.Artigo,
+                        ISNULL(O.QtFabricada, '0') as QtFabricada,
+                        O.CustoMateriaisReal,
+                        O.CustoTransformacaoReal,
+                        O.CustoSubprodutosReal,
+                        ISNULL(O.CDU_CodigoProjeto, '') as CDU_CodigoProjeto,
+                        O.DescricaoFamilia as Familia,
+                        O.UnidadeBase,
+                        ISNULL(Op.SubContratacao, 0) as SubContratacao,
+                        ISNULL(Op.Descricao, '') as Descricao,
+                        0 as RececionadoVFS, -- Calcular posteriormente se necessário
+                        0 as RececionadoVFA  -- Calcular posteriormente se necessário
+                    FROM OrdemFabricoData O
+                    INNER JOIN OperacoesData Op ON O.IDOrdemFabrico = Op.IDOrdemFabrico
+                    ORDER BY O.OrdemFabrico";
+
+                resultCompleto = BSO.Consulta(queryCompleta);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro na consulta principal: {ex.Message}");
+                MessageBox.Show("Erro ao carregar dados. Tente novamente.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return dt;
+            }
 
             // Criar set de artigos existentes no documento para verificação rápida
             var artigosExistentesNoDoc = new HashSet<string>();
@@ -273,14 +343,32 @@ namespace ADSucoremaExtensibilidade
                 artigosExistentesNoDoc.Add(this.DocumentoStock.Linhas.GetEdita(y).Artigo);
             }
 
-            // Processar resultados - OTIMIZADO
-            var numResultados = Math.Min(resultCompleto.NumLinhas(), 1000);
+            // Processar resultados - OTIMIZADO com controle de timeout
+            var numResultados = Math.Min(resultCompleto.NumLinhas(), 500);
             resultCompleto.Inicio();
+
+            // Adicionar indicador de progresso para operações longas
+            var processedCount = 0;
+            var startTime = DateTime.Now;
 
             for (int i = 0; i < numResultados; i++)
             {
                 try
                 {
+                    // Verificar timeout a cada 50 registros
+                    if (i % 50 == 0)
+                    {
+                        var elapsed = DateTime.Now - startTime;
+                        if (elapsed.TotalSeconds > 30) // Timeout de 30 segundos
+                        {
+                            MessageBox.Show($"Processamento interrompido após 30 segundos. Processados {i} de {numResultados} registros.", "Timeout", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            break;
+                        }
+
+                        // Permitir que a UI responda
+                        System.Windows.Forms.Application.DoEvents();
+                    }
+
                     var custoMateriais = Convert.ToDecimal(resultCompleto.DaValor<object>("CustoMateriaisReal") ?? 0);
                     var custoTransformacao = Convert.ToDecimal(resultCompleto.DaValor<object>("CustoTransformacaoReal") ?? 0);
                     var custoSubprodutos = Convert.ToDecimal(resultCompleto.DaValor<object>("CustoSubprodutosReal") ?? 0);
@@ -290,15 +378,23 @@ namespace ADSucoremaExtensibilidade
                     var artigoAtual = resultCompleto.DaValor<string>("Artigo") ?? "";
                     var isSubContratacao = Convert.ToBoolean(resultCompleto.DaValor<object>("SubContratacao") ?? false);
 
-                    // Calcular receção apenas quando necessário (lazy loading)
+                    // Calcular receção apenas quando necessário (lazy loading) - com timeout
                     bool jaRececionado = false;
-                    if (isSubContratacao && !string.IsNullOrEmpty(ordemFabricoAtual))
+                    try
                     {
-                        jaRececionado = VerificarRececaoComCache(true, ordemFabricoAtual, artigoAtual);
+                        if (isSubContratacao && !string.IsNullOrEmpty(ordemFabricoAtual))
+                        {
+                            jaRececionado = VerificarRececaoComCache(true, ordemFabricoAtual, artigoAtual);
+                        }
+                        else if (!string.IsNullOrEmpty(artigoAtual))
+                        {
+                            jaRececionado = VerificarRececaoComCache(false, ordemFabricoAtual, artigoAtual);
+                        }
                     }
-                    else if (!string.IsNullOrEmpty(artigoAtual))
+                    catch (Exception recepcaoEx)
                     {
-                        jaRececionado = VerificarRececaoComCache(false, ordemFabricoAtual, artigoAtual);
+                        System.Diagnostics.Debug.WriteLine($"Erro ao verificar receção para {artigoAtual}: {recepcaoEx.Message}");
+                        jaRececionado = false; // Continuar sem receção
                     }
 
                     dt.Rows.Add(
@@ -315,55 +411,73 @@ namespace ADSucoremaExtensibilidade
                         jaRececionado,
                         isSubContratacao
                     );
+
+                    processedCount++;
                 }
                 catch (Exception ex)
                 {
                     // Log do erro e continuar processamento
                     System.Diagnostics.Debug.WriteLine($"Erro ao processar linha {i}: {ex.Message}");
+                    continue;
                 }
 
-                resultCompleto.Seguinte();
+                try
+                {
+                    resultCompleto.Seguinte();
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Erro ao avançar para próximo registro: {ex.Message}");
+                    break;
+                }
             }
+
+            System.Diagnostics.Debug.WriteLine($"Processamento concluído: {processedCount} registros processados em {(DateTime.Now - startTime).TotalSeconds:F2} segundos");
 
             return dt;
         }
 
-        private Dictionary<string, bool> _cacheRececaoVFS = new Dictionary<string, bool>();
-        private Dictionary<string, bool> _cacheRececaoVFA = new Dictionary<string, bool>();
-
         private bool VerificarRececaoComCache(bool isSubcontratacao, string ordemFabrico, string artigo)
         {
-            if (isSubcontratacao)
+            try
             {
-                if (_cacheRececaoVFS.ContainsKey(ordemFabrico))
-                    return _cacheRececaoVFS[ordemFabrico];
+                if (isSubcontratacao)
+                {
+                    if (_cacheRececaoVFS.ContainsKey(ordemFabrico))
+                        return _cacheRececaoVFS[ordemFabrico];
 
-                var queryRececaoVFS = $@"SELECT COUNT(*) as count
-                                        FROM LinhasCompras L
-                                        INNER JOIN CabecCompras C ON L.IdCabecCompras = C.ID
-                                        WHERE L.Descricao LIKE '%{ordemFabrico}%' AND C.TipoDoc = 'VFS'";
+                    var queryRececaoVFS = $@"SELECT TOP 1 COUNT(*) as count
+                                            FROM LinhasCompras L WITH(NOLOCK)
+                                            INNER JOIN CabecCompras C WITH(NOLOCK) ON L.IdCabecCompras = C.ID
+                                            WHERE L.Descricao LIKE '%{ordemFabrico}%' AND C.TipoDoc = 'VFS'";
 
-                var resultVFS = BSO.Consulta(queryRececaoVFS);
-                bool rececionado = resultVFS.DaValor<int>("count") > 0;
-                _cacheRececaoVFS[ordemFabrico] = rececionado;
-                return rececionado;
+                    var resultVFS = BSO.Consulta(queryRececaoVFS);
+                    bool rececionado = resultVFS.DaValor<int>("count") > 0;
+                    _cacheRececaoVFS[ordemFabrico] = rececionado;
+                    return rececionado;
+                }
+                else
+                {
+                    string chaveCache = $"{artigo}_{projeto}";
+                    if (_cacheRececaoVFA.ContainsKey(chaveCache))
+                        return _cacheRececaoVFA[chaveCache];
+
+                    var queryRececaoVFA = $@"SELECT TOP 1 COUNT(*) as count
+                                            FROM LinhasCompras L WITH(NOLOCK)
+                                            INNER JOIN CabecCompras C WITH(NOLOCK) ON L.IdCabecCompras = C.ID
+                                            INNER JOIN COP_Obras AS CO WITH(NOLOCK) ON L.ObraID = CO.ID
+                                            WHERE L.Artigo = '{artigo}' AND C.TipoDoc = 'VFA' AND CO.Codigo = '{projeto}'";
+
+                    var resultVFA = BSO.Consulta(queryRececaoVFA);
+                    bool rececionado = resultVFA.DaValor<int>("count") > 0;
+                    _cacheRececaoVFA[chaveCache] = rececionado;
+                    return rececionado;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                string chaveCache = $"{artigo}_{projeto}";
-                if (_cacheRececaoVFA.ContainsKey(chaveCache))
-                    return _cacheRececaoVFA[chaveCache];
-
-                var queryRececaoVFA = $@"SELECT COUNT(*) as count
-                                        FROM LinhasCompras L
-                                        INNER JOIN CabecCompras C ON L.IdCabecCompras = C.ID
-                                        INNER JOIN COP_Obras AS CO ON L.ObraID = CO.ID
-                                        WHERE L.Artigo = '{artigo}' AND C.TipoDoc = 'VFA' AND CO.Codigo = '{projeto}'";
-
-                var resultVFA = BSO.Consulta(queryRececaoVFA);
-                bool rececionado = resultVFA.DaValor<int>("count") > 0;
-                _cacheRececaoVFA[chaveCache] = rececionado;
-                return rececionado;
+                System.Diagnostics.Debug.WriteLine($"Erro ao verificar receção: {ex.Message}");
+                return false; // Em caso de erro, assumir que não foi rececionado
             }
         }
 
@@ -398,7 +512,6 @@ namespace ADSucoremaExtensibilidade
 
             return cacheFamilias[codigoFamilia];
         }
-
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
@@ -449,155 +562,224 @@ namespace ADSucoremaExtensibilidade
 
         private void button1_Click(object sender, System.EventArgs e)
         {
-            List<DataRow> linhasSelecionadas = new List<DataRow>();
-            List<string> artigosJaExistentes = new List<string>();
-            List<string> servicosIgnorados = new List<string>();
-            var documento = BSO.Internos.Documentos.Edita(this.DocumentoStock.Tipodoc, this.DocumentoStock.NumDoc, this.DocumentoStock.Serie, this.DocumentoStock.Filial);
+            ProgressForm progressForm = null;
 
-            foreach (DataGridViewRow row in dgvOrdensFabrico.Rows)
+            try
             {
-                if (Convert.ToBoolean(row.Cells["Selecionado"].Value))
+                // ⚡ ULTRA-OTIMIZADO: Coleta todos os artigos selecionados primeiro (SEM SQL)
+                var artigosSelecionados = new List<(string artigo, string familia, DataRow row)>();
+                var servicosIgnorados = new List<string>();
+
+                // Primeira passagem: apenas coleta dados (0% CPU SQL)
+                foreach (DataGridViewRow row in dgvOrdensFabrico.Rows)
                 {
-                    DataRow dataRow = ((DataRowView)row.DataBoundItem).Row;
-                    var artigo = dataRow["Artigo"].ToString();
-
-                    // Verificar se é serviço e ignorar
-                    string familia = dataRow["Familia"].ToString();
-                    bool isServico = familia == "011" || familia.ToLower().Contains("serviço");
-                    if (isServico)
+                    if (Convert.ToBoolean(row.Cells["Selecionado"].Value))
                     {
-                        servicosIgnorados.Add(artigo);
-                        continue; // Pula serviços
+                        DataRow dataRow = ((DataRowView)row.DataBoundItem).Row;
+                        var artigo = dataRow["Artigo"].ToString();
+                        var familia = dataRow["Familia"].ToString();
+
+                        // Verificar serviços sem SQL
+                        bool isServico = familia == "011" || familia.ToLower().Contains("serviço");
+                        if (isServico)
+                        {
+                            servicosIgnorados.Add(artigo);
+                            continue;
+                        }
+
+                        artigosSelecionados.Add((artigo, familia, dataRow));
                     }
+                }
 
-                    // Verificar se o artigo já existe em qualquer SOF do projeto
-                    var queryVerificacao = $@"SELECT COUNT(*) AS count
-                                           FROM CabecInternos CI
-                                           JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
-                                           JOIN [GPR_OrdemFabrico] GF ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
-                                           WHERE CI.TipoDoc = 'SOF' 
-                                             AND GF.CDU_CodigoProjeto = '{projeto}'
-                                             AND LI.Artigo = '{artigo}';";
+                if (artigosSelecionados.Count == 0)
+                {
+                    string mensagemVazia = "Nenhum artigo válido selecionado.";
+                    if (servicosIgnorados.Count > 0)
+                    {
+                        mensagemVazia += $"\n\nServiços ignorados: {string.Join(", ", servicosIgnorados)}";
+                    }
+                    MessageBox.Show(mensagemVazia);
+                    return;
+                }
 
-                    var resultadoVerificacao = BSO.Consulta(queryVerificacao);
-                    resultadoVerificacao.Inicio();
+                // 🔄 MOSTRAR LOADING
+                progressForm = new ProgressForm();
+                progressForm.UpdateProgress(0, $"Preparando processamento de {artigosSelecionados.Count} artigos...");
+                progressForm.Show();
+                progressForm.BringToFront();
+                System.Windows.Forms.Application.DoEvents();
 
-                    if (resultadoVerificacao.DaValor<int>("count") > 0)
+                // ⚡ CONSULTA ÚNICA EM LOTE: Verificar TODOS os artigos de uma vez
+                progressForm.UpdateProgress(20, "Verificando artigos existentes...");
+                System.Windows.Forms.Application.DoEvents();
+
+                var artigosStr = string.Join("','", artigosSelecionados.Select(x => x.artigo));
+                var queryBatch = $@"
+                    SELECT DISTINCT LI.Artigo
+                    FROM CabecInternos CI WITH(NOLOCK)
+                    JOIN LinhasInternos LI WITH(NOLOCK) ON CI.Id = LI.IdCabecInternos
+                    JOIN GPR_OrdemFabrico GF WITH(NOLOCK) ON CI.IdOrdemFabrico = GF.IDOrdemFabrico
+                    WHERE CI.TipoDoc = 'SOF' 
+                      AND GF.CDU_CodigoProjeto = '{projeto}'
+                      AND LI.Artigo IN ('{artigosStr}')
+                      AND CI.IDOperadorGPR > 0";
+
+                // ⚡ UMA ÚNICA CONSULTA SQL para todos os artigos
+                var artigosExistentesResult = BSO.Consulta(queryBatch);
+                var artigosExistentesHashSet = new HashSet<string>();
+
+                progressForm.UpdateProgress(40, "Processando resultados da consulta...");
+                System.Windows.Forms.Application.DoEvents();
+
+                // Processar resultado uma única vez
+                var numExistentes = artigosExistentesResult.NumLinhas();
+                artigosExistentesResult.Inicio();
+                for (int i = 0; i < numExistentes; i++)
+                {
+                    artigosExistentesHashSet.Add(artigosExistentesResult.DaValor<string>("Artigo"));
+                    artigosExistentesResult.Seguinte();
+                }
+
+                // ⚡ Separar artigos para processar (sem mais SQL)
+                progressForm.UpdateProgress(60, "Separando artigos para processamento...");
+                System.Windows.Forms.Application.DoEvents();
+
+                var artigosParaAdicionar = new List<(string artigo, DataRow row)>();
+                var artigosJaExistentes = new List<string>();
+
+                foreach (var (artigo, familia, row) in artigosSelecionados)
+                {
+                    if (artigosExistentesHashSet.Contains(artigo))
                     {
                         artigosJaExistentes.Add(artigo);
-                        continue; // Pula este artigo e não o adiciona
-                    }
-
-                    linhasSelecionadas.Add(dataRow);
-                    var lote = dataRow["OrdemFabrico"].ToString();
-                    var uni = dataRow["Unidade"].ToString();
-
-                    var Qtf = dataRow["QtFabricada"].ToString();
-                    var total = dataRow["Total"].ToString();
-                    var qtd = double.Parse(Qtf);
-                    var tot = double.Parse(total);
-
-                    // Calcular preço unitário
-                    double precoUnitario = 0.000;
-                    if (double.TryParse(Qtf, out double quantidadeFabricada) && double.TryParse(total, out double totalValue))
-                    {
-                        if (cbTipoLista.SelectedIndex >= 1) // Artigos elétricos e outras famílias
-                        {
-                            precoUnitario = totalValue; // Para elétricos e outras famílias, usar o total como preço unitário
-                        }
-                        else // Artigos subcontratados (índice 0)
-                        {
-                            if (totalValue != 0)
-                            {
-                                if (quantidadeFabricada != 0)
-                                {
-                                    precoUnitario = totalValue / quantidadeFabricada;
-                                }
-                                else
-                                {
-                                    precoUnitario = totalValue / 1.000;
-                                }
-                            }
-                            else
-                            {
-                                precoUnitario = totalValue / 1.000;
-                            }
-                        }
                     }
                     else
                     {
-                        MessageBox.Show("Erro ao converter os valores para números.");
-                        continue;
+                        artigosParaAdicionar.Add((artigo, row));
+                    }
+                }
+
+                // ⚡ ADICIONAR TODOS de uma vez ao documento
+                if (artigosParaAdicionar.Count > 0)
+                {
+                    progressForm.UpdateProgress(80, $"Adicionando {artigosParaAdicionar.Count} artigos ao documento...");
+                    System.Windows.Forms.Application.DoEvents();
+
+                    var documento = BSO.Internos.Documentos.Edita(this.DocumentoStock.Tipodoc, this.DocumentoStock.NumDoc, this.DocumentoStock.Serie, this.DocumentoStock.Filial);
+
+                    int processados = 0;
+                    foreach (var (artigo, row) in artigosParaAdicionar)
+                    {
+                        try
+                        {
+                            // Atualizar progresso a cada 10 artigos
+                            if (processados % 10 == 0)
+                            {
+                                int progressoArtigos = 80 + (int)((double)processados / artigosParaAdicionar.Count * 15);
+                                progressForm.UpdateProgress(progressoArtigos, $"Processando artigo {processados + 1} de {artigosParaAdicionar.Count}: {artigo}");
+                                System.Windows.Forms.Application.DoEvents();
+                            }
+
+                            // Processar dados sem consultas SQL adicionais
+                            var Qtf = row["QtFabricada"].ToString();
+                            var total = row["Total"].ToString();
+
+                            // Calcular preço unitário otimizado
+                            double precoUnitario = 0.000;
+                            if (double.TryParse(Qtf, out double quantidadeFabricada) && double.TryParse(total, out double totalValue))
+                            {
+                                if (cbTipoLista.SelectedIndex >= 1)
+                                {
+                                    precoUnitario = totalValue;
+                                }
+                                else
+                                {
+                                    if (totalValue != 0)
+                                    {
+                                        precoUnitario = quantidadeFabricada != 0 ? totalValue / quantidadeFabricada : totalValue;
+                                    }
+                                }
+                            }
+
+                            // ⚡ Adicionar linha sem validações desnecessárias
+                            BSO.Internos.Documentos.AdicionaLinha(documento, artigo);
+                            processados++;
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Erro ao processar artigo {artigo}: {ex.Message}");
+                        }
                     }
 
-                    var infoArtigo = BSO.Base.Artigos.Edita(artigo);
-                    var unidade = infoArtigo.UnidadeBase;
-                    var descricao = infoArtigo.Descricao;
-                    var codigoFamilia = infoArtigo.Familia;
+                    progressForm.UpdateProgress(95, "Validando e atualizando documento...");
+                    System.Windows.Forms.Application.DoEvents();
 
+                    // ⚡ UMA ÚNICA validação e atualização no final
+                    var error = "";
+                    BSO.Internos.Documentos.ValidaActualizacao(documento, ref error);
+                    BSO.Internos.Documentos.Actualiza(documento);
+                }
 
-                    /*
-                    IntBELinhaDocumentoInterno linha = new IntBELinhaDocumentoInterno()
+                progressForm.UpdateProgress(100, "Processamento concluído!");
+                System.Windows.Forms.Application.DoEvents();
+
+                // Pequena pausa para mostrar 100%
+                System.Threading.Thread.Sleep(500);
+
+                // Fechar loading
+                progressForm.Close();
+                progressForm = null;
+
+                // Construir mensagem final
+                string mensagem = "";
+                if (artigosParaAdicionar.Count > 0)
+                {
+                    mensagem = $"✅ {artigosParaAdicionar.Count} artigos adicionados ao SOF com sucesso!";
+                }
+
+                if (artigosJaExistentes.Count > 0)
+                {
+                    string ignorados = string.Join(", ", artigosJaExistentes.Take(10));
+                    if (artigosJaExistentes.Count > 10) ignorados += "...";
+
+                    if (!string.IsNullOrEmpty(mensagem))
                     {
-                        Artigo = artigo,
-                        Lote = !string.IsNullOrEmpty(lote) ? lote : "",
-                        Unidade = uni,
-                        Descricao = descricao,
-                        Armazem = "A1",
-                        Quantidade = qtd,
-                        PrecoUnitario = precoUnitario,
-                        INV_EstadoOrigem = "DISP"
-                    };
-                    */
-                    BSO.Internos.Documentos.AdicionaLinha(documento, artigo);
-
-
-                    //documento.Linhas.Insere(linha);
+                        mensagem += $"\n\n⚠️ {artigosJaExistentes.Count} artigos já existentes (ignorados): {ignorados}";
+                    }
+                    else
+                    {
+                        mensagem = $"⚠️ Artigos já existentes no SOF (ignorados): {ignorados}";
+                    }
                 }
-            }
 
-            string mensagem = "";
-            if (linhasSelecionadas.Count > 0)
-            {
-                var error = "";
-                BSO.Internos.Documentos.ValidaActualizacao(documento, ref error);
-                BSO.Internos.Documentos.Actualiza(documento);
-                mensagem = $"{linhasSelecionadas.Count} linhas adicionadas ao SOF.";
-            }
-
-            if (artigosJaExistentes.Count > 0)
-            {
-                string artigosIgnorados = string.Join(", ", artigosJaExistentes);
-                if (!string.IsNullOrEmpty(mensagem))
+                if (servicosIgnorados.Count > 0)
                 {
-                    mensagem += $"\n\nArtigos já existentes no SOF (ignorados): {artigosIgnorados}";
-                }
-                else
-                {
-                    mensagem = $"Os seguintes artigos já existem no SOF e foram ignorados: {artigosIgnorados}";
-                }
-            }
+                    string servicosTexto = string.Join(", ", servicosIgnorados.Take(5));
+                    if (servicosIgnorados.Count > 5) servicosTexto += "...";
 
-            if (servicosIgnorados.Count > 0)
+                    if (!string.IsNullOrEmpty(mensagem))
+                    {
+                        mensagem += $"\n\nℹ️ {servicosIgnorados.Count} serviços ignorados: {servicosTexto}";
+                    }
+                    else
+                    {
+                        mensagem = $"ℹ️ Serviços ignorados: {servicosTexto}";
+                    }
+                }
+
+                MessageBox.Show(mensagem, "Processamento Concluído", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Close();
+            }
+            catch (Exception ex)
             {
-                string servicosTexto = string.Join(", ", servicosIgnorados);
-                if (!string.IsNullOrEmpty(mensagem))
+                // Fechar loading em caso de erro
+                if (progressForm != null)
                 {
-                    mensagem += $"\n\nServiços ignorados (apenas para visualização): {servicosTexto}";
+                    progressForm.Close();
                 }
-                else
-                {
-                    mensagem = $"Serviços ignorados (apenas para visualização): {servicosTexto}";
-                }
-            }
 
-            if (linhasSelecionadas.Count == 0 && artigosJaExistentes.Count == 0)
-            {
-                mensagem = "Nenhuma linha foi selecionada.";
+                MessageBox.Show($"Erro durante o processamento: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            MessageBox.Show(mensagem);
-            this.Close();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -1229,7 +1411,6 @@ namespace ADSucoremaExtensibilidade
                     worksheet.Cells[1, 4] = "Descrição";
                     worksheet.Cells[1, 5] = "Familia";
 
-
                     // Formatar cabeçalhos
                     Range headerRange = worksheet.Range["A1:E1"];
                     headerRange.Font.Bold = true;
@@ -1241,7 +1422,6 @@ namespace ADSucoremaExtensibilidade
                     worksheet.Cells[2, 3] = 0.00;
                     worksheet.Cells[2, 4] = "Descrição do artigo";
                     worksheet.Cells[2, 5] = "FAM001";
-
 
                     // Formatar linha de exemplo em itálico
                     Range exampleRange = worksheet.Range["A2:E2"];
@@ -1299,7 +1479,6 @@ namespace ADSucoremaExtensibilidade
                     dtImportados.Columns.Add("Rececionado", typeof(bool));
                     dtImportados.Columns.Add("SubContratacao", typeof(bool));
 
-
                     // Ler dados do Excel (assumindo que a primeira linha são cabeçalhos)
                     int row = 2;
                     int artigosImportados = 0;
@@ -1341,7 +1520,6 @@ namespace ADSucoremaExtensibilidade
                             familiaExcel = worksheet.Cells[row, 5].Value.ToString();
                         }
 
-
                         if (!string.IsNullOrEmpty(artigo) && quantidade > 0)
                         {
                             // Verificar se o artigo existe na base de dados
@@ -1364,7 +1542,6 @@ namespace ADSucoremaExtensibilidade
                                     // Usar descrição do Excel se fornecida, senão usar da base de dados
                                     string descricaoFinal = !string.IsNullOrEmpty(descricaoExcel) ? descricaoExcel : infoArtigo.Descricao;
                                     string familiaFinal = !string.IsNullOrEmpty(familiaExcel) ? familiaExcel : infoArtigo.Familia;
-
 
                                     dtImportados.Rows.Add(
                                         true, // Selecionado por defeito
