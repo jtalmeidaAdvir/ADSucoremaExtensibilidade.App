@@ -823,29 +823,53 @@ namespace ADSucoremaExtensibilidade
                                 System.Windows.Forms.Application.DoEvents();
                             }
 
-                            // Processar dados sem consultas SQL adicionais
-                            var Qtf = row["QtFabricada"].ToString();
-                            var total = row["Total"].ToString();
+                            // Verificar se é artigo subcontratado
+                            bool isSubcontratado = Convert.ToBoolean(row["SubContratacao"]);
 
-                            // Calcular preço unitário otimizado
-                            double precoUnitario = 0.000;
-                            if (double.TryParse(Qtf, out double quantidadeFabricada) && double.TryParse(total, out double totalValue))
+                            if (isSubcontratado && cbTipoLista.SelectedIndex == 0) // Artigos Subcontratados
                             {
-                                if (cbTipoLista.SelectedIndex >= 1)
+                                // Lógica especial para artigos subcontratados
+                                string ordemFabrico = row["OrdemFabrico"].ToString();
+                                string unidade = row["Unidade"].ToString();
+                                string qtFabricada = row["QtFabricada"].ToString();
+                                string total = row["Total"].ToString();
+
+                                double quantidade = double.Parse(qtFabricada);
+                                double totalValue = double.Parse(total);
+                                double precoUnitario = 0.0;
+
+                                if (!double.TryParse(qtFabricada, out double result) || !double.TryParse(total, out double result2))
                                 {
-                                    precoUnitario = totalValue;
+                                    MessageBox.Show("Erro ao converter os valores para números.");
+                                    continue;
                                 }
-                                else
+
+                                precoUnitario = (cbTipoLista.SelectedIndex == 1) ? result2 : ((result2 == 0.0) ? (result2 / 1.0) : ((result == 0.0) ? (result2 / 1.0) : (result2 / result)));
+
+                                var infoArtigo = BSO.Base.Artigos.Edita(artigo);
+                                string unidadeBase = infoArtigo.UnidadeBase;
+                                string descricao = infoArtigo.Descricao;
+
+                                IntBELinhaDocumentoInterno linha = new IntBELinhaDocumentoInterno
                                 {
-                                    if (totalValue != 0)
-                                    {
-                                        precoUnitario = quantidadeFabricada != 0 ? totalValue / quantidadeFabricada : totalValue;
-                                    }
-                                }
+                                    Artigo = artigo,
+                                    Lote = (!string.IsNullOrEmpty(ordemFabrico)) ? ordemFabrico : "",
+                                    Unidade = "UN",
+                                    Descricao = descricao,
+                                    Armazem = "A1",
+                                    Quantidade = quantidade,
+                                    PrecoUnitario = precoUnitario,
+                                    INV_EstadoOrigem = "DISP"
+                                };
+
+                                documento.Linhas.Insere(linha);
+                            }
+                            else
+                            {
+                                // Lógica padrão para outros tipos de artigos
+                                BSO.Internos.Documentos.AdicionaLinha(documento, artigo);
                             }
 
-                            // ⚡ Adicionar linha sem validações desnecessárias
-                            BSO.Internos.Documentos.AdicionaLinha(documento, artigo);
                             processados++;
                         }
                         catch (Exception ex)
