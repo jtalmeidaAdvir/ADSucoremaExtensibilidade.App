@@ -174,8 +174,37 @@ namespace ADSucoremaExtensibilidade
 
         private void CarregarArtigosSubcontratadosCompleto()
         {
+            System.Diagnostics.Debug.WriteLine($"=== CARREGANDO ARTIGOS SUBCONTRATADOS PARA PROJETO: {projeto} ===");
+
+            if (string.IsNullOrEmpty(projeto))
+            {
+                System.Diagnostics.Debug.WriteLine("ERRO: Projeto está vazio ou nulo!");
+                _dadosCompletos = CriarDataTableVazio();
+                return;
+            }
+
+            // Usar a lógica exata do código antigo
             var todasOrdemFabricoProjeto = GetInfoListaOrdemFabricoProjeto(projeto);
-            _dadosCompletos = GetInfoOrdemFabricoSubGrid(todasOrdemFabricoProjeto);
+            System.Diagnostics.Debug.WriteLine($"Total de ordens do projeto: {todasOrdemFabricoProjeto.NumLinhas()}");
+
+            if (todasOrdemFabricoProjeto.NumLinhas() == 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"AVISO: Nenhuma ordem de fabrico encontrada para o projeto {projeto}");
+                _dadosCompletos = CriarDataTableVazio();
+                return;
+            }
+
+            // Buscar ordens com subcontratação usando a lógica antiga
+            var ordensComSubcontratacao = GetInfoOrdemFabricoSub(todasOrdemFabricoProjeto);
+            System.Diagnostics.Debug.WriteLine($"Ordens com subcontratação encontradas: {ordensComSubcontratacao.Count}");
+
+            _dadosCompletos = GetInfoOrdemFabricoSubGridAntiga(todasOrdemFabricoProjeto, ordensComSubcontratacao);
+            System.Diagnostics.Debug.WriteLine($"Total de linhas no DataTable final: {_dadosCompletos.Rows.Count}");
+
+            if (_dadosCompletos.Rows.Count == 0)
+            {
+                System.Diagnostics.Debug.WriteLine("AVISO: Nenhum artigo subcontratado encontrado após processamento!");
+            }
         }
 
         private void CarregarArtigosEletricosCompleto()
@@ -186,7 +215,7 @@ namespace ADSucoremaExtensibilidade
 
         private List<StdBELista> GetInfoOrdemFabricoSub(StdBELista todasOrdemFabricoProjeto)
         {
-            var ordensComSubcontratacao = new List<StdBELista>(); // Lista para armazenar os resultados
+            var ordensComSubcontratacao = new List<StdBELista>();
             var num = todasOrdemFabricoProjeto.NumLinhas();
 
             todasOrdemFabricoProjeto.Inicio();
@@ -194,7 +223,7 @@ namespace ADSucoremaExtensibilidade
             {
                 var idOrdem = todasOrdemFabricoProjeto.DaValor<string>("IDOrdemFabrico");
 
-                // Busca apenas ordens que têm subcontratação ativa
+                // Usar a mesma lógica do código antigo
                 var query = $"SELECT * FROM GPR_OrdemFabricoOperacoes WHERE IDOrdemFabrico = '{idOrdem}' AND SubContratacao = 1";
                 var result = BSO.Consulta(query);
 
@@ -219,8 +248,11 @@ namespace ADSucoremaExtensibilidade
         {
             try
             {
-                var query = $"SELECT TOP 500 IDOrdemFabrico,CDU_CodigoProjeto,* FROM GPR_OrdemFabrico WITH(NOLOCK) WHERE CDU_CodigoProjeto = '{projecto}' ORDER BY IDOrdemFabrico";
+                // Query igual ao código antigo que funcionava
+                var query = $"SELECT TOP 500 IDOrdemFabrico,CDU_CodigoProjeto,OrdemFabrico,Artigo,QtFabricada,CustoMateriaisReal,CustoTransformacaoReal,CustoSubprodutosReal FROM GPR_OrdemFabrico WITH(NOLOCK) WHERE CDU_CodigoProjeto = '{projecto}'";
                 var lista = BSO.Consulta(query);
+                System.Diagnostics.Debug.WriteLine($"Query executada: {query}");
+                System.Diagnostics.Debug.WriteLine($"Resultados encontrados: {lista.NumLinhas()}");
                 return lista;
             }
             catch (Exception ex)
@@ -240,201 +272,326 @@ namespace ADSucoremaExtensibilidade
 
         private System.Data.DataTable GetInfoOrdemFabricoSubGrid(StdBELista todasOrdemFabricoProjeto)
         {
-            System.Data.DataTable dt = new System.Data.DataTable();
+            System.Data.DataTable dataTable = new System.Data.DataTable();
 
-            dt.Columns.Add("Selecionado", typeof(bool));
-            dt.Columns.Add("OrdemFabrico", typeof(string));
-            dt.Columns.Add("Artigo", typeof(string));
-            dt.Columns.Add("Familia", typeof(string));
-            dt.Columns.Add("Unidade", typeof(string));
-            dt.Columns.Add("QtFabricada", typeof(string));
-            dt.Columns.Add("Liquido", typeof(decimal));
-            dt.Columns.Add("Total", typeof(decimal));
-            dt.Columns.Add("Descricao", typeof(string));
-            dt.Columns.Add("Projecto", typeof(string));
-            dt.Columns.Add("Rececionado", typeof(bool));
-            dt.Columns.Add("SubContratacao", typeof(bool));
+            dataTable.Columns.Add("Selecionado", typeof(bool));
+            dataTable.Columns.Add("OrdemFabrico", typeof(string));
+            dataTable.Columns.Add("Artigo", typeof(string));
+            dataTable.Columns.Add("Familia", typeof(string));
+            dataTable.Columns.Add("Unidade", typeof(string));
+            dataTable.Columns.Add("QtFabricada", typeof(string));
+            dataTable.Columns.Add("Liquido", typeof(decimal));
+            dataTable.Columns.Add("Total", typeof(decimal));
+            dataTable.Columns.Add("Descricao", typeof(string));
+            dataTable.Columns.Add("Projecto", typeof(string));
+            dataTable.Columns.Add("Rececionado", typeof(bool));
+            dataTable.Columns.Add("SubContratacao", typeof(bool));
 
-            var num = todasOrdemFabricoProjeto.NumLinhas();
-            if (num == 0) return dt;
+            int num = todasOrdemFabricoProjeto.NumLinhas();
+            System.Diagnostics.Debug.WriteLine($"Processando {num} ordens de fabrico para subcontratação");
 
-            // Limitar processamento para evitar travamentos
-            if (num > 500)
-            {
-                MessageBox.Show($"Muitos registros encontrados ({num}). Será processado apenas os primeiros 500 para evitar travamentos.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                num = 500;
-            }
-
-            // Criar lista de IDs das ordens de fabrico para consulta em lote (LIMITADO A 1000)
-            var idsOrdens = new List<string>();
             todasOrdemFabricoProjeto.Inicio();
-            for (int i = 0; i < Math.Min(num, 1000); i++) // Limitar para evitar consultas muito grandes
+
+            for (int i = 0; i < num; i++)
             {
-                idsOrdens.Add(todasOrdemFabricoProjeto.DaValor<string>("IDOrdemFabrico"));
+                string idOrdem = todasOrdemFabricoProjeto.DaValor<string>("IDOrdemFabrico");
+                System.Diagnostics.Debug.WriteLine($"Verificando ordem ID: {idOrdem}");
+
+                // Buscar operações de subcontratação para esta ordem
+                string queryOperacoes = $"SELECT IDOrdemFabrico, SubContratacao, Descricao FROM GPR_OrdemFabricoOperacoes WHERE IDOrdemFabrico = '{idOrdem}' AND SubContratacao = 1";
+                StdBELista operacoes = BSO.Consulta(queryOperacoes);
+
+                int numOperacoes = operacoes.NumLinhas();
+                System.Diagnostics.Debug.WriteLine($"Ordem {idOrdem} tem {numOperacoes} operações com subcontratação");
+
+                if (numOperacoes > 0)
+                {
+                    // Buscar dados da ordem de fabrico
+                    string queryOrdem = $"SELECT OrdemFabrico, Artigo, QtFabricada, CustoMateriaisReal, CustoTransformacaoReal, CustoSubprodutosReal, CDU_CodigoProjeto FROM GPR_OrdemFabrico WHERE IDOrdemFabrico = '{idOrdem}'";
+                    StdBELista dadosOrdem = BSO.Consulta(queryOrdem);
+
+                    if (dadosOrdem.NumLinhas() > 0)
+                    {
+                        dadosOrdem.Inicio();
+                        operacoes.Inicio();
+
+                        for (int j = 0; j < numOperacoes; j++)
+                        {
+                            decimal custoMateriais = SafeGetDecimal(dadosOrdem.DaValor<object>("CustoMateriaisReal"));
+                            decimal custoTransformacao = SafeGetDecimal(dadosOrdem.DaValor<object>("CustoTransformacaoReal"));
+                            decimal custoSubprodutos = SafeGetDecimal(dadosOrdem.DaValor<object>("CustoSubprodutosReal"));
+                            decimal total = custoMateriais + custoTransformacao + custoSubprodutos;
+
+                            string ordemFabrico = dadosOrdem.DaValor<string>("OrdemFabrico");
+                            string artigo = dadosOrdem.DaValor<string>("Artigo");
+
+                            System.Diagnostics.Debug.WriteLine($"Processando artigo: {artigo}, Ordem: {ordemFabrico}");
+
+                            // Verificar receção VFS (lógica exata do código antigo)
+                            string queryRecepcao = $@"SELECT 
+                                                L.Descricao,
+                                                L.Unidade,
+                                                L.PrecUnit,
+                                                L.PrecoLiquido,
+                                                L.Quantidade,
+                                                L.IdCabecCompras,
+                                                C.*
+                                            FROM 
+                                                LinhasCompras L
+                                            INNER JOIN 
+                                                CabecCompras C
+                                                ON L.IdCabecCompras = C.ID
+                                            WHERE 
+                                                L.Descricao LIKE '%{ordemFabrico}%' 
+                                                AND C.TipoDoc = 'VFS'";
+
+                            StdBELista recepcao = BSO.Consulta(queryRecepcao);
+                            int numRecepcoes = recepcao.NumLinhas();
+
+                            string familia = "";
+                            string unidadeArtigo = "UN";
+                            try
+                            {
+                                var infoArtigo = BSO.Base.Artigos.Edita(artigo);
+                                if (infoArtigo != null)
+                                {
+                                    familia = infoArtigo.Familia ?? "";
+                                    unidadeArtigo = infoArtigo.UnidadeBase ?? "UN";
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Erro ao obter info do artigo {artigo}: {ex.Message}");
+                            }
+
+                            if (numRecepcoes > 0)
+                            {
+                                recepcao.Inicio();
+                                // Artigo rececionado - usar dados da receção
+                                double quantidade = Math.Round(Math.Abs(Convert.ToDouble(recepcao.DaValor<string>("Quantidade"))), 3);
+                                double precUnit = Math.Round(Math.Abs(Convert.ToDouble(recepcao.DaValor<string>("PrecUnit"))), 4);
+                                double precoLiquido = Math.Round(Math.Abs(Convert.ToDouble(recepcao.DaValor<string>("PrecoLiquido"))), 4);
+                                string unidade = recepcao.DaValor<string>("Unidade") ?? unidadeArtigo;
+
+                                dataTable.Rows.Add(
+                                    false,
+                                    ordemFabrico,
+                                    artigo,
+                                    familia,
+                                    unidade,
+                                    quantidade,
+                                    precoLiquido,
+                                    precUnit,
+                                    operacoes.DaValor<string>("Descricao"),
+                                    dadosOrdem.DaValor<string>("CDU_CodigoProjeto"),
+                                    true,
+                                    true
+                                );
+
+                                System.Diagnostics.Debug.WriteLine($"Adicionado artigo rececionado: {artigo}");
+                            }
+                            else
+                            {
+                                // Artigo não rececionado - usar dados calculados
+                                string qtdFabricada = dadosOrdem.DaValor<string>("QtFabricada") ?? "0";
+
+                                dataTable.Rows.Add(
+                                    false,
+                                    ordemFabrico,
+                                    artigo,
+                                    familia,
+                                    unidadeArtigo,
+                                    qtdFabricada,
+                                    0.0,
+                                    total,
+                                    operacoes.DaValor<string>("Descricao"),
+                                    dadosOrdem.DaValor<string>("CDU_CodigoProjeto"),
+                                    false,
+                                    true
+                                );
+
+                                System.Diagnostics.Debug.WriteLine($"Adicionado artigo não rececionado: {artigo}");
+                            }
+
+                            operacoes.Seguinte();
+                        }
+                    }
+                }
+
                 todasOrdemFabricoProjeto.Seguinte();
             }
 
-            // CONSULTA ULTRA-OTIMIZADA com índices e TOP
-            var idsOrdensStr = string.Join(",", idsOrdens);
+            System.Diagnostics.Debug.WriteLine($"Total de linhas adicionadas ao DataTable: {dataTable.Rows.Count}");
+            return dataTable;
+        }
 
-            StdBELista resultCompleto;
-            try
+        // Função helper do código antigo
+        private static decimal SafeGetDecimal(object value)
+        {
+            return (value == null || value == DBNull.Value) ? 0m : Convert.ToDecimal(value);
+        }
+
+        // Método baseado na lógica exata do código antigo que funcionava
+        private System.Data.DataTable GetInfoOrdemFabricoSubGridAntiga(StdBELista todasOrdemFabricoProjeto, List<StdBELista> ordensComSubcontratacao)
+        {
+            System.Data.DataTable dataTable = new System.Data.DataTable();
+
+            dataTable.Columns.Add("Selecionado", typeof(bool));
+            dataTable.Columns.Add("OrdemFabrico", typeof(string));
+            dataTable.Columns.Add("Artigo", typeof(string));
+            dataTable.Columns.Add("Familia", typeof(string));
+            dataTable.Columns.Add("Unidade", typeof(string));
+            dataTable.Columns.Add("QtFabricada", typeof(string));
+            dataTable.Columns.Add("Liquido", typeof(decimal));
+            dataTable.Columns.Add("Total", typeof(decimal));
+            dataTable.Columns.Add("Descricao", typeof(string));
+            dataTable.Columns.Add("Projecto", typeof(string));
+            dataTable.Columns.Add("Rececionado", typeof(bool));
+            dataTable.Columns.Add("SubContratacao", typeof(bool));
+
+            int num = todasOrdemFabricoProjeto.NumLinhas();
+            todasOrdemFabricoProjeto.Inicio();
+
+            for (int i = 0; i < num; i++)
             {
-                var queryCompleta = $@"
-                    WITH OrdemFabricoData AS (
-                        SELECT TOP 500
-                            G.IDOrdemFabrico,
-                            G.OrdemFabrico,
-                            G.Artigo,
-                            G.QtFabricada,
-                            ISNULL(G.CustoMateriaisReal, 0) as CustoMateriaisReal,
-                            ISNULL(G.CustoTransformacaoReal, 0) as CustoTransformacaoReal,
-                            ISNULL(G.CustoSubprodutosReal, 0) as CustoSubprodutosReal,
-                            G.CDU_CodigoProjeto,
-                            ISNULL(A.Familia, '') as Familia,
-                            ISNULL(A.UnidadeBase, 'UN') as UnidadeBase,
-                            ISNULL(F.Descricao, A.Familia) as DescricaoFamilia
-                        FROM GPR_OrdemFabrico G WITH(NOLOCK)
-                        LEFT JOIN Artigo A WITH(NOLOCK) ON G.Artigo = A.Artigo
-                        LEFT JOIN Familias F WITH(NOLOCK) ON A.Familia = F.Familia
-                        WHERE G.IDOrdemFabrico IN ({idsOrdensStr})
-                    ),
-                    OperacoesData AS (
-                        SELECT 
-                            IDOrdemFabrico,
-                            CAST(SubContratacao as bit) as SubContratacao,
-                            ISNULL(Descricao, '') as Descricao
-                        FROM GPR_OrdemFabricoOperacoes WITH(NOLOCK)
-                        WHERE IDOrdemFabrico IN ({idsOrdensStr}) 
-                          AND SubContratacao = 1
-                    )
-                    SELECT TOP 500
-                        O.IDOrdemFabrico,
-                        O.OrdemFabrico,
-                        O.Artigo,
-                        ISNULL(O.QtFabricada, '0') as QtFabricada,
-                        O.CustoMateriaisReal,
-                        O.CustoTransformacaoReal,
-                        O.CustoSubprodutosReal,
-                        ISNULL(O.CDU_CodigoProjeto, '') as CDU_CodigoProjeto,
-                        O.DescricaoFamilia as Familia,
-                        O.UnidadeBase,
-                        ISNULL(Op.SubContratacao, 0) as SubContratacao,
-                        ISNULL(Op.Descricao, '') as Descricao,
-                        0 as RececionadoVFS, -- Calcular posteriormente se necessário
-                        0 as RececionadoVFA  -- Calcular posteriormente se necessário
-                    FROM OrdemFabricoData O
-                    INNER JOIN OperacoesData Op ON O.IDOrdemFabrico = Op.IDOrdemFabrico
-                    ORDER BY O.OrdemFabrico";
+                string idOrdem = todasOrdemFabricoProjeto.DaValor<string>("IDOrdemFabrico");
 
-                resultCompleto = BSO.Consulta(queryCompleta);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Erro na consulta principal: {ex.Message}");
-                MessageBox.Show("Erro ao carregar dados. Tente novamente.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return dt;
-            }
-
-            // Criar set de artigos existentes no documento para verificação rápida
-            var artigosExistentesNoDoc = new HashSet<string>();
-            for (int y = 1; y <= this.DocumentoStock.Linhas.NumItens; y++)
-            {
-                artigosExistentesNoDoc.Add(this.DocumentoStock.Linhas.GetEdita(y).Artigo);
-            }
-
-            // Processar resultados - OTIMIZADO com controle de timeout
-            var numResultados = Math.Min(resultCompleto.NumLinhas(), 500);
-            resultCompleto.Inicio();
-
-            // Adicionar indicador de progresso para operações longas
-            var processedCount = 0;
-            var startTime = DateTime.Now;
-
-            for (int i = 0; i < numResultados; i++)
-            {
-                try
+                // Verificar se esta ordem tem subcontratação usando a lista já filtrada
+                bool temSubcontratacao = ordensComSubcontratacao.Any(ordem =>
                 {
-                    // Verificar timeout a cada 50 registros
-                    if (i % 50 == 0)
+                    if (ordem.NumLinhas() > 0)
                     {
-                        var elapsed = DateTime.Now - startTime;
-                        if (elapsed.TotalSeconds > 30) // Timeout de 30 segundos
-                        {
-                            MessageBox.Show($"Processamento interrompido após 30 segundos. Processados {i} de {numResultados} registros.", "Timeout", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            break;
-                        }
-
-                        // Permitir que a UI responda
-                        System.Windows.Forms.Application.DoEvents();
+                        ordem.Inicio();
+                        return ordem.DaValor<string>("IDOrdemFabrico") == idOrdem;
                     }
+                    return false;
+                });
 
-                    var custoMateriais = Convert.ToDecimal(resultCompleto.DaValor<object>("CustoMateriaisReal") ?? 0);
-                    var custoTransformacao = Convert.ToDecimal(resultCompleto.DaValor<object>("CustoTransformacaoReal") ?? 0);
-                    var custoSubprodutos = Convert.ToDecimal(resultCompleto.DaValor<object>("CustoSubprodutosReal") ?? 0);
-                    var total = custoMateriais + custoTransformacao + custoSubprodutos;
+                if (temSubcontratacao)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Processando ordem com subcontratação: {idOrdem}");
 
-                    var ordemFabricoAtual = resultCompleto.DaValor<string>("OrdemFabrico") ?? "";
-                    var artigoAtual = resultCompleto.DaValor<string>("Artigo") ?? "";
-                    var isSubContratacao = Convert.ToBoolean(resultCompleto.DaValor<object>("SubContratacao") ?? false);
+                    // Buscar dados da ordem de fabrico
+                    string ordemFabrico = todasOrdemFabricoProjeto.DaValor<string>("OrdemFabrico");
+                    string artigo = todasOrdemFabricoProjeto.DaValor<string>("Artigo");
+                    string qtdFabricada = todasOrdemFabricoProjeto.DaValor<string>("QtFabricada") ?? "0";
+                    string codigoProjeto = todasOrdemFabricoProjeto.DaValor<string>("CDU_CodigoProjeto");
 
-                    // Calcular receção apenas quando necessário (lazy loading) - com timeout
-                    bool jaRececionado = false;
+                    decimal custoMateriais = SafeGetDecimal(todasOrdemFabricoProjeto.DaValor<object>("CustoMateriaisReal"));
+                    decimal custoTransformacao = SafeGetDecimal(todasOrdemFabricoProjeto.DaValor<object>("CustoTransformacaoReal"));
+                    decimal custoSubprodutos = SafeGetDecimal(todasOrdemFabricoProjeto.DaValor<object>("CustoSubprodutosReal"));
+                    decimal total = custoMateriais + custoTransformacao + custoSubprodutos;
+
+                    // Buscar informações do artigo
+                    string familia = "";
+                    string unidadeArtigo = "UN";
+                    string descricaoOperacao = "";
+
                     try
                     {
-                        if (isSubContratacao && !string.IsNullOrEmpty(ordemFabricoAtual))
+                        var infoArtigo = BSO.Base.Artigos.Edita(artigo);
+                        if (infoArtigo != null)
                         {
-                            jaRececionado = VerificarRececaoComCache(true, ordemFabricoAtual, artigoAtual);
+                            familia = infoArtigo.Familia ?? "";
+                            unidadeArtigo = infoArtigo.UnidadeBase ?? "UN";
                         }
-                        else if (!string.IsNullOrEmpty(artigoAtual))
+
+                        // Buscar descrição da operação de subcontratação
+                        var operacao = ordensComSubcontratacao.FirstOrDefault(op =>
                         {
-                            jaRececionado = VerificarRececaoComCache(false, ordemFabricoAtual, artigoAtual);
+                            if (op.NumLinhas() > 0)
+                            {
+                                op.Inicio();
+                                return op.DaValor<string>("IDOrdemFabrico") == idOrdem;
+                            }
+                            return false;
+                        });
+
+                        if (operacao != null && operacao.NumLinhas() > 0)
+                        {
+                            operacao.Inicio();
+                            descricaoOperacao = operacao.DaValor<string>("Descricao") ?? "";
                         }
                     }
-                    catch (Exception recepcaoEx)
+                    catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Erro ao verificar receção para {artigoAtual}: {recepcaoEx.Message}");
-                        jaRececionado = false; // Continuar sem receção
+                        System.Diagnostics.Debug.WriteLine($"Erro ao obter info do artigo {artigo}: {ex.Message}");
                     }
 
-                    dt.Rows.Add(
-                        false,
-                        ordemFabricoAtual,
-                        artigoAtual,
-                        resultCompleto.DaValor<string>("Familia") ?? "",
-                        resultCompleto.DaValor<string>("UnidadeBase") ?? "UN",
-                        resultCompleto.DaValor<string>("QtFabricada") ?? "0",
-                        0.000m,
-                        total,
-                        resultCompleto.DaValor<string>("Descricao") ?? "",
-                        resultCompleto.DaValor<string>("CDU_CodigoProjeto") ?? "",
-                        jaRececionado,
-                        isSubContratacao
-                    );
+                    // Verificar receção usando a lógica do código antigo
+                    string queryRecepcao = $@"SELECT 
+                                        L.Descricao,
+                                        L.Unidade,
+                                        L.PrecUnit,
+                                        L.PrecoLiquido,
+                                        L.Quantidade,
+                                        L.IdCabecCompras,
+                                        C.*
+                                    FROM 
+                                        LinhasCompras L
+                                    INNER JOIN 
+                                        CabecCompras C
+                                        ON L.IdCabecCompras = C.ID
+                                    WHERE 
+                                        L.Descricao LIKE '%{ordemFabrico}%' 
+                                        AND C.TipoDoc = 'VFS'";
 
-                    processedCount++;
-                }
-                catch (Exception ex)
-                {
-                    // Log do erro e continuar processamento
-                    System.Diagnostics.Debug.WriteLine($"Erro ao processar linha {i}: {ex.Message}");
-                    continue;
+                    StdBELista recepcao = BSO.Consulta(queryRecepcao);
+                    int numRecepcoes = recepcao.NumLinhas();
+
+                    if (numRecepcoes > 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Artigo rececionado encontrado: {artigo} - Ordem: {ordemFabrico}");
+                        recepcao.Inicio();
+
+                        // Artigo rececionado - usar dados da receção
+                        double quantidade = Math.Round(Math.Abs(Convert.ToDouble(recepcao.DaValor<string>("Quantidade"))), 3);
+                        double precUnit = Math.Round(Math.Abs(Convert.ToDouble(recepcao.DaValor<string>("PrecUnit"))), 4);
+                        double precoLiquido = Math.Round(Math.Abs(Convert.ToDouble(recepcao.DaValor<string>("PrecoLiquido"))), 4);
+                        string unidade = recepcao.DaValor<string>("Unidade") ?? unidadeArtigo;
+
+                        dataTable.Rows.Add(
+                            false,
+                            ordemFabrico,
+                            artigo,
+                            familia,
+                            unidade,
+                            quantidade,
+                            precoLiquido,
+                            precUnit,
+                            descricaoOperacao,
+                            codigoProjeto,
+                            true,
+                            true
+                        );
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Artigo não rececionado: {artigo} - Ordem: {ordemFabrico}");
+
+                        // Artigo não rececionado - usar dados calculados
+                        dataTable.Rows.Add(
+                            false,
+                            ordemFabrico,
+                            artigo,
+                            familia,
+                            unidadeArtigo,
+                            qtdFabricada,
+                            0.0,
+                            total,
+                            descricaoOperacao,
+                            codigoProjeto,
+                            false,
+                            true
+                        );
+                    }
                 }
 
-                try
-                {
-                    resultCompleto.Seguinte();
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine($"Erro ao avançar para próximo registro: {ex.Message}");
-                    break;
-                }
+                todasOrdemFabricoProjeto.Seguinte();
             }
 
-            System.Diagnostics.Debug.WriteLine($"Processamento concluído: {processedCount} registros processados em {(DateTime.Now - startTime).TotalSeconds:F2} segundos");
-
-            return dt;
+            System.Diagnostics.Debug.WriteLine($"Total de linhas adicionadas ao DataTable: {dataTable.Rows.Count}");
+            return dataTable;
         }
 
         private bool VerificarRececaoComCache(bool isSubcontratacao, string ordemFabrico, string artigo)
@@ -515,47 +672,33 @@ namespace ADSucoremaExtensibilidade
 
         private void dataGridView1_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.RowIndex < dgvOrdensFabrico.Rows.Count)
+            if (dgvOrdensFabrico.Columns[e.ColumnIndex].Name == "Artigo")
             {
-                var row = dgvOrdensFabrico.Rows[e.RowIndex];
+                string artigo = dgvOrdensFabrico.Rows[e.RowIndex].Cells["Artigo"].Value.ToString();
+                bool existe = false;
 
-                // Verificar se é serviço (família 011) através da família, não da subcontratação
-                bool isServico = false;
-                if (row.Cells["Familia"].Value != null)
+                string query = $@"SELECT COUNT(*) AS count
+                       FROM CabecInternos CI
+                       JOIN LinhasInternos LI ON CI.Id = LI.IdCabecInternos
+                       WHERE CI.TipoDoc = 'SOF' 
+                         AND CI.IdOrdemFabrico = '{DocumentoStock.IdOrdemFabrico}'
+                         AND LI.Artigo = '{artigo}'";
+
+                StdBELista resultado = BSO.Consulta(query);
+                resultado.Inicio();
+
+                if (resultado.DaValor<int>("count") > 0)
                 {
-                    string familia = row.Cells["Familia"].Value.ToString();
-                    // Verificar se a família é "011" ou se a descrição contém "Serviços"
-                    isServico = familia == "011" || familia.ToLower().Contains("serviço");
+                    existe = true;
                 }
 
-                if (isServico)
+                if (existe)
                 {
-                    // Para serviços: cor de fundo amarelo claro e desabilitar checkbox
-                    row.DefaultCellStyle.BackColor = Color.LightYellow;
-                    row.Cells["Selecionado"].ReadOnly = true;
-                    row.Cells["Selecionado"].Style.BackColor = Color.LightYellow;
-                    row.Cells["Selecionado"].Value = false; // Sempre false para serviços
-                    return;
+                    dgvOrdensFabrico.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.LightGray;
                 }
-
-                // Para outros artigos, verificar se já existem em SOFs do projeto
-                if (dgvOrdensFabrico.Columns[e.ColumnIndex].Name == "Artigo")
+                else
                 {
-                    string artigo = row.Cells["Artigo"].Value?.ToString();
-                    if (!string.IsNullOrEmpty(artigo))
-                    {
-                        bool existe = VerificarArtigoExisteEmSOF(artigo);
-
-                        // Pinta a linha de cinza claro se o artigo já existir em qualquer SOF do projeto
-                        if (existe)
-                        {
-                            row.DefaultCellStyle.BackColor = Color.LightGray;
-                        }
-                        else
-                        {
-                            row.DefaultCellStyle.BackColor = Color.White;
-                        }
-                    }
+                    dgvOrdensFabrico.Rows[e.RowIndex].DefaultCellStyle.BackColor = Color.White;
                 }
             }
         }
@@ -809,35 +952,34 @@ namespace ADSucoremaExtensibilidade
 
         private StdBELista GetArtigosEletricos(string codigoProjeto)
         {
-            var query = $@"SELECT TOP 1000
+            string query = @"SELECT 
                             LC.Artigo,
-                            ISNULL(LC.Descricao, '') as Descricao,
-                            ISNULL(LC.Lote, '') as Lote,
-                            ISNULL(LC.Quantidade, 0) as Quantidade,
-                            ISNULL(A.Familia, '') as Familia,
+                            LC.Descricao,
+                            LC.Lote,
+                            LC.Quantidade,
+                            A.Familia,
                             CC.NumDoc,
                             CC.Serie,
                             CO.Codigo,
-                            ISNULL(OFA.OrdemFabrico, '') as OrdemFabrico,
-                            ISNULL(LC.PrecUnit, 0) as PrecUnit,
-                            ISNULL(LC.PrecoLiquido, 0) as PrecoLiquido
+                            OFA.OrdemFabrico,
+                            LC.PrecUnit,
+                            LC.PrecoLiquido
                         FROM 
-                            CabecCompras AS CC WITH(NOLOCK)
+                            CabecCompras AS CC
                         INNER JOIN 
-                            LinhasCompras AS LC WITH(NOLOCK) ON CC.Id = LC.IdCabecCompras
+                            LinhasCompras AS LC ON CC.Id = LC.IdCabecCompras
                         INNER JOIN 
-                            Artigo AS A WITH(NOLOCK) ON LC.Artigo = A.Artigo
+                            Artigo AS A ON LC.Artigo = A.Artigo
                         INNER JOIN 
-                            COP_Obras AS CO WITH(NOLOCK) ON LC.ObraID = CO.ID
+                            COP_Obras AS CO ON LC.ObraID = CO.ID
                         LEFT JOIN 
-                            GPR_OrdemFabrico AS OFA WITH(NOLOCK) ON LC.Artigo = OFA.Artigo
+                            GPR_OrdemFabrico AS OFA ON LC.Artigo = OFA.Artigo
                         WHERE 
-                            CC.TipoDoc = 'ECF'
+                            CC.TipoDoc = 'VFA'
                             AND LC.Artigo IS NOT NULL
-                            AND A.Familia IN ('004', '024')
+                            AND (A.Familia = '004' OR A.Familia = '024')
                             AND LC.ObraID IS NOT NULL
-                            AND CO.Codigo = '{codigoProjeto}'
-                        ORDER BY LC.Artigo";
+                            AND CO.Codigo = '" + codigoProjeto + "'";
 
             return BSO.Consulta(query);
         }
