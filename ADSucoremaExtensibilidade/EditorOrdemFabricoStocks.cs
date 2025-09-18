@@ -832,12 +832,12 @@ namespace ADSucoremaExtensibilidade
                                 string ordemFabrico = row["OrdemFabrico"].ToString();
                                 string unidade = row["Unidade"].ToString();
                                 string qtFabricada = row["QtFabricada"].ToString();
-                                string total = row["Total"].ToString();
+                                string total = row["Liquido"].ToString();
 
                                 double quantidade = double.Parse(qtFabricada);
                                 double totalValue = double.Parse(total);
                                 double precoUnitario = 0.0;
-
+                           
                                 if (!double.TryParse(qtFabricada, out double result) || !double.TryParse(total, out double result2))
                                 {
                                     MessageBox.Show("Erro ao converter os valores para números.");
