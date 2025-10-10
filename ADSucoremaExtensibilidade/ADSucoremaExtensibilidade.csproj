@@ -131,12 +131,17 @@
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\IIntBS100.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="IInvBS100">
+      <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\APL\IInvBS100.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="IntBE100">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\IntBE100.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="InvBE100">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\InvBE100.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="IVndBS100">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\IVndBS100.dll</HintPath>
@@ -178,6 +183,10 @@
     </Reference>
     <Reference Include="Primavera.Extensibility.Internal">
       <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\Apl\Primavera.Extensibility.Internal.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Primavera.Extensibility.Inventory">
+      <HintPath>..\..\..\..\..\..\Program Files\PRIMAVERA\SG100\APL\Primavera.Extensibility.Inventory.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Primavera.Extensibility.POS">
@@ -298,6 +307,8 @@
     <Compile Include="SelecionarArtigosEletricos.Designer.cs">
       <DependentUpon>SelecionarArtigosEletricos.cs</DependentUpon>
     </Compile>
+    <Compile Include="TransferenciaDosArtigos008.cs" />
+    <Compile Include="TransferenciasArmazem.cs" />
     <Compile Include="UiEditorInternos.cs" />
     <Compile Include="UiEditorProducao.cs" />
     <Compile Include="UiOrdensFabrico.cs" />

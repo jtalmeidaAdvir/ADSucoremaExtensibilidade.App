@@ -709,6 +709,7 @@ namespace ADSucoremaExtensibilidade
 
             try
             {
+
                 // ⚡ ULTRA-OTIMIZADO: Coleta todos os artigos selecionados primeiro (SEM SQL)
                 var artigosSelecionados = new List<(string artigo, string familia, DataRow row)>();
                 var servicosIgnorados = new List<string>();
