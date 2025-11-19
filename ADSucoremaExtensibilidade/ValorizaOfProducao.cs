@@ -72,32 +72,36 @@ namespace ADSucoremaExtensibilidade
 
                     //coloca so a descricao Encargo de 30% sobre materiais
                     var oFSEOF = $@"SELECT 
-    ROUND(
-        SUM(CAST(LI.PrecUnit AS DECIMAL(18,4)) * CAST(LI.Quantidade AS DECIMAL(18,4))) * 0.3
-    , 2) AS Acrescimo30PorCento
-FROM 
-    CabecInternos AS CI
-INNER JOIN 
-    LinhasInternos AS LI ON CI.ID = LI.IdCabecInternos
-LEFT JOIN 
-    GPR_OrdemFabrico AS OFs ON OFs.OrdemFabrico = LI.Lote
-OUTER APPLY 
-    (
-        SELECT TOP 1 IDCentroTrabalho
-        FROM GPR_OrdemFabricoOperacoes
-        WHERE IDOrdemFabrico = OFs.IDOrdemFabrico
-        ORDER BY Operacao DESC
-    ) AS OFO
-LEFT JOIN 
-    GPR_CentrosTrabalho AS CT ON CT.IDCentroTrabalho = OFO.IDCentroTrabalho
-WHERE 
-    CI.TipoDoc = 'SOF' 
-    AND CI.IdOrdemFabrico = '{Of}'
-    AND (CT.CentroTrabalho IS NULL OR CT.CentroTrabalho != 'MON');";
+                                    ROUND(
+                                        SUM(CAST(LI.PrecUnit AS DECIMAL(18,4)) * CAST(LI.Quantidade AS DECIMAL(18,4))) * 0.3
+                                    , 2) AS Acrescimo30PorCento
+                                FROM 
+                                    CabecInternos AS CI
+                                INNER JOIN 
+                                    LinhasInternos AS LI ON CI.ID = LI.IdCabecInternos
+                                LEFT JOIN 
+                                    GPR_OrdemFabrico AS OFs ON OFs.OrdemFabrico = LI.Lote
+                                OUTER APPLY 
+                                    (
+                                        SELECT TOP 1 IDCentroTrabalho
+                                        FROM GPR_OrdemFabricoOperacoes
+                                        WHERE IDOrdemFabrico = OFs.IDOrdemFabrico
+                                        ORDER BY Operacao DESC
+                                    ) AS OFO
+                                LEFT JOIN 
+                                    GPR_CentrosTrabalho AS CT ON CT.IDCentroTrabalho = OFO.IDCentroTrabalho
+                                LEFT JOIN 
+                                    Artigo A ON A.Artigo = LI.Artigo
+                                WHERE 
+                                    CI.TipoDoc = 'SOF' 
+                                    AND CI.IdOrdemFabrico = '{Of}'
+                                    AND (CT.CentroTrabalho IS NULL OR CT.CentroTrabalho != 'MON')
+                                    AND A.Familia NOT IN ('008', '021', '022', '024', '025');
+                                ";
          
                     var sqlOfSEOF = BSO.Consulta(oFSEOF);
+                //    MessageBox.Show(sqlOfSEOF.DaValor<double>("Acrescimo30PorCento").ToString());
 
-                 
 
                     if (sqlOfSEOF == null || sqlOfSEOF.NumLinhas() == 0)
                     {
@@ -189,19 +193,24 @@ INNER JOIN
     LinhasInternos AS LI ON CI.ID = LI.IdCabecInternos
 LEFT JOIN 
     GPR_OrdemFabrico AS OFs ON OFs.OrdemFabrico = LI.Lote
-OUTER APPLY 
-    (
-        SELECT TOP 1 IDCentroTrabalho
-        FROM GPR_OrdemFabricoOperacoes
-        WHERE IDOrdemFabrico = OFs.IDOrdemFabrico
-        ORDER BY Operacao DESC
-    ) AS OFO
+OUTER APPLY (
+    SELECT TOP 1 IDCentroTrabalho
+    FROM GPR_OrdemFabricoOperacoes
+    WHERE IDOrdemFabrico = OFs.IDOrdemFabrico
+    ORDER BY Operacao DESC
+) AS OFO
 LEFT JOIN 
     GPR_CentrosTrabalho AS CT ON CT.IDCentroTrabalho = OFO.IDCentroTrabalho
+-- Junta a tabela de artigos para poder filtrar por família
+LEFT JOIN 
+    Artigo A ON A.Artigo = LI.Artigo
 WHERE 
     CI.TipoDoc = 'SOF' 
     AND CI.IdOrdemFabrico = '{IdOrdemFabrico}'
-    AND (CT.CentroTrabalho IS NULL OR CT.CentroTrabalho != 'MON');";
+    AND (CT.CentroTrabalho IS NULL OR CT.CentroTrabalho != 'MON')
+    -- Aqui exclui os artigos de certas famílias
+    AND A.Familia NOT IN ('008', '021', '022', '024', '025');
+";
                     var ordem = BSO.Consulta(ordemSQL);
                     if (ordem == null || ordem.NumLinhas() == 0)
                     {

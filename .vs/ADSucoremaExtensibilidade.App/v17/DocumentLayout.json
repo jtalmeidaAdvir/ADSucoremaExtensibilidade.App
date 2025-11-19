@@ -3,6 +3,46 @@
   "WorkspaceRootPath": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\valorizaofproducao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\valorizaofproducao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\editorordemfabricostocks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\editorordemfabricostocks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\editorordemfabricostocks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\editorordemfabricostocks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\frmproject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\frmproject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\priform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\priform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\progressform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\progressform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\selecionarartigoseletricos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\selecionarartigoseletricos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\uieditorproducao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\uieditorproducao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\valorizarof.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\valorizarof.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\transferenciadosartigos008.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\transferenciadosartigos008.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|c:\\users\\jtalm\\desktop\\suc\\adsucoremaextensibilidade.app\\adsucoremaextensibilidade\\transferenciasarmazem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\transferenciasarmazem.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -11,36 +51,20 @@
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\editorartigosunidade.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|c:\\users\\jtalm\\desktop\\suc\\adsucoremaextensibilidade.app\\adsucoremaextensibilidade\\sales\\menuimpressao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\sales\\menuimpressao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\sales\\menuimpressao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|c:\\users\\jtalm\\desktop\\suc\\adsucoremaextensibilidade.app\\adsucoremaextensibilidade\\sales\\formpreview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\sales\\formpreview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\sales\\formpreview.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\selecionarartigoseletricos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\selecionarartigoseletricos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\rececao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\rececao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|c:\\users\\jtalm\\desktop\\suc\\adsucoremaextensibilidade.app\\adsucoremaextensibilidade\\progressform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\progressform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\priform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\priform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|c:\\users\\jtalm\\desktop\\suc\\adsucoremaextensibilidade.app\\adsucoremaextensibilidade\\packages.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\packages.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\packages.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\frmproject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\frmproject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\entradaofvalorizadas.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
@@ -51,19 +75,11 @@
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\editorvalores.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\editorordemfabricostocks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\editorordemfabricostocks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\editorimportarexelof.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\editorimportarexelof.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|c:\\users\\jtalm\\desktop\\suc\\adsucoremaextensibilidade.app\\adsucoremaextensibilidade\\transferenciadosartigos008.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\transferenciadosartigos008.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|c:\\users\\jtalm\\desktop\\suc\\adsucoremaextensibilidade.app\\adsucoremaextensibilidade\\editor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\editor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\editor.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -71,16 +87,8 @@
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\uieditorinternos.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\uieditorproducao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\uieditorproducao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\uiordensfabrico.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\uiordensfabrico.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\editorordemfabricostocks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\editorordemfabricostocks.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\progressform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -107,16 +115,8 @@
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\selecionarartigoseletricos.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\valorizaofproducao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\valorizaofproducao.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\purchases\\uieditorcompras.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\purchases\\uieditorcompras.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\adsucoremaextensibilidade\\valorizarof.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BF0ED51C-9A49-482D-85D4-4AF95F6F0931}|ADSucoremaExtensibilidade\\ADSucoremaExtensibilidade.csproj|solutionrelative:adsucoremaextensibilidade\\valorizarof.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -135,43 +135,44 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "TransferenciasArmazem.cs",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\TransferenciasArmazem.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\TransferenciasArmazem.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\TransferenciasArmazem.cs",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\TransferenciasArmazem.cs",
-              "ViewState": "AgIAAEUAAAAAAAAAAAAuwFgAAAAxAAAAAAAAAA==",
+              "Title": "ValorizaOfProducao.cs",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\ValorizaOfProducao.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\ValorizaOfProducao.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\ValorizaOfProducao.cs",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\ValorizaOfProducao.cs",
+              "ViewState": "AgIAAEwAAAAAAAAAAAAkwGYAAAASAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-10T08:01:01.061Z",
+              "WhenOpened": "2025-07-02T10:24:39.827Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MenuImpressao.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Sales\\MenuImpressao.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\Sales\\MenuImpressao.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Sales\\MenuImpressao.cs [Design]",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\Sales\\MenuImpressao.cs [Design]",
+              "DocumentIndex": 1,
+              "Title": "EditorOrdemFabricoStocks.cs",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
+              "ViewState": "AgIAAEAAAAAAAAAAAAAowEADAABVAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-10T08:58:34.142Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "FormPreview.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Sales\\FormPreview.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\Sales\\FormPreview.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Sales\\FormPreview.cs [Design]",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\Sales\\FormPreview.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-10T08:58:33.166Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2025-09-04T10:45:49.434Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
+              "Title": "SelecionarArtigosEletricos.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.cs [Design]",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-04T14:01:31.208Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "ProgressForm.cs [Design]",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\ProgressForm.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\ProgressForm.cs",
@@ -183,7 +184,107 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Priform.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Priform.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\Priform.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Priform.cs [Design]",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\Priform.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-04T10:40:39.796Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "FrmProject.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\FrmProject.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\FrmProject.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\FrmProject.cs [Design]",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\FrmProject.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-04T10:40:36.629Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "EditorOrdemFabricoStocks.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs [Design]",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-04T10:40:22.186Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "UiEditorProducao.cs",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\UiEditorProducao.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\UiEditorProducao.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\UiEditorProducao.cs",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\UiEditorProducao.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAiwBwAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-02T10:24:43.309Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 8,
+              "Title": "ValorizarOF.cs",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\ValorizarOF.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\ValorizarOF.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\ValorizarOF.cs",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\ValorizarOF.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-02T10:24:37.559Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "TransferenciaDosArtigos008.cs",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\TransferenciaDosArtigos008.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\TransferenciaDosArtigos008.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\TransferenciaDosArtigos008.cs",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\TransferenciaDosArtigos008.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T07:59:20.583Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "TransferenciasArmazem.cs",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\TransferenciasArmazem.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\TransferenciasArmazem.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\TransferenciasArmazem.cs",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\TransferenciasArmazem.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAhwBsAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T08:01:01.061Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "MenuImpressao.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Sales\\MenuImpressao.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\Sales\\MenuImpressao.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Sales\\MenuImpressao.cs [Design]",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\Sales\\MenuImpressao.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-10T08:58:34.142Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
               "Title": "packages.config",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\packages.config",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\packages.config",
@@ -196,19 +297,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "FrmProject.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\FrmProject.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\FrmProject.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\FrmProject.cs [Design]",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\FrmProject.cs [Design]",
+              "DocumentIndex": 13,
+              "Title": "FormPreview.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Sales\\FormPreview.cs",
+              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\Sales\\FormPreview.cs",
+              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Sales\\FormPreview.cs [Design]",
+              "RelativeToolTip": "ADSucoremaExtensibilidade\\Sales\\FormPreview.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-04T10:40:36.629Z",
+              "WhenOpened": "2025-10-10T08:58:33.166Z",
               "EditorCaption": " [Design]"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 11,
               "Title": "EditorArtigosUnidade.cs [Design]",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorArtigosUnidade.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EditorArtigosUnidade.cs",
@@ -220,7 +321,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 16,
               "Title": "EntradaOFValorizadas.cs [Design]",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EntradaOFValorizadas.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EntradaOFValorizadas.cs",
@@ -232,7 +333,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 17,
               "Title": "EditorValores.cs [Design]",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorValores.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EditorValores.cs",
@@ -244,44 +345,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 14,
               "Title": "Rececao.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Rececao.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\Rececao.cs",
               "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Rececao.cs",
               "RelativeToolTip": "ADSucoremaExtensibilidade\\Rececao.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAcAAAAAAAAAAIBJwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-10T10:43:07.914Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "SelecionarArtigosEletricos.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.cs [Design]",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-04T14:01:31.208Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "EditorOrdemFabricoStocks.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs [Design]",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-04T10:40:22.186Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 18,
               "Title": "EditorImportarExelOF.cs [Design]",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorImportarExelOF.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EditorImportarExelOF.cs",
@@ -293,32 +370,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Priform.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Priform.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\Priform.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Priform.cs [Design]",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\Priform.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-04T10:40:39.796Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "TransferenciaDosArtigos008.cs",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\TransferenciaDosArtigos008.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\TransferenciaDosArtigos008.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\TransferenciaDosArtigos008.cs",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\TransferenciaDosArtigos008.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-10T07:59:20.583Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 19,
               "Title": "Editor.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Editor.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\Editor.cs",
@@ -331,59 +383,33 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 20,
               "Title": "UiEditorInternos.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\UiEditorInternos.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\UiEditorInternos.cs",
               "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\UiEditorInternos.cs",
               "RelativeToolTip": "ADSucoremaExtensibilidade\\UiEditorInternos.cs",
-              "ViewState": "AgIAADsAAAAAAAAAAAAQwE4AAAARAAAAAAAAAA==",
+              "ViewState": "AgIAAEsAAAAAAAAAAABRwE4AAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-10T10:43:10.063Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "UiEditorProducao.cs",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\UiEditorProducao.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\UiEditorProducao.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\UiEditorProducao.cs",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\UiEditorProducao.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAAAA8AAABfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-02T10:24:43.309Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 21,
               "Title": "UiOrdensFabrico.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\UiOrdensFabrico.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\UiOrdensFabrico.cs",
               "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\UiOrdensFabrico.cs",
               "RelativeToolTip": "ADSucoremaExtensibilidade\\UiOrdensFabrico.cs",
-              "ViewState": "AgIAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAxwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-02T10:24:41.444Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
-              "Title": "EditorOrdemFabricoStocks.cs",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAAA8AAAAxAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-04T10:45:49.434Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 24,
               "Title": "EditorValores.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorValores.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EditorValores.cs",
@@ -396,7 +422,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 22,
               "Title": "ProgressForm.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\ProgressForm.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\ProgressForm.cs",
@@ -409,7 +435,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 23,
               "Title": "EditorOrdemFabricoStocks.Designer.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.Designer.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EditorOrdemFabricoStocks.Designer.cs",
@@ -422,20 +448,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 25,
               "Title": "EditorImportarExelOF.Designer.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorImportarExelOF.Designer.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\EditorImportarExelOF.Designer.cs",
               "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\EditorImportarExelOF.Designer.cs",
               "RelativeToolTip": "ADSucoremaExtensibilidade\\EditorImportarExelOF.Designer.cs",
-              "ViewState": "AgIAAAwAAAAAAAAAAAAYwBsAAAAWAAAAAAAAAA==",
+              "ViewState": "AgIAABMAAAAAAAAAAABRwBYAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-04T15:47:33.596Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 26,
               "Title": "SelecionarArtigosEletricos.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.cs",
@@ -448,32 +474,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 27,
               "Title": "SelecionarArtigosEletricos.Designer.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.Designer.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.Designer.cs",
               "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.Designer.cs",
               "RelativeToolTip": "ADSucoremaExtensibilidade\\SelecionarArtigosEletricos.Designer.cs",
-              "ViewState": "AgIAAHAAAAAAAAAAAAAYwIMAAABFAAAAAAAAAA==",
+              "ViewState": "AgIAABUAAAAAAAAAAABRwIMAAABFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-04T14:01:42.165Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
-              "Title": "ValorizaOfProducao.cs",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\ValorizaOfProducao.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\ValorizaOfProducao.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\ValorizaOfProducao.cs",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\ValorizaOfProducao.cs",
-              "ViewState": "AgIAAFkAAAAAAAAAAAAmwHkAAABEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-02T10:24:39.827Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 27,
+              "DocumentIndex": 28,
               "Title": "UiEditorCompras.cs",
               "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\Purchases\\UiEditorCompras.cs",
               "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\Purchases\\UiEditorCompras.cs",
@@ -481,19 +495,8 @@
               "RelativeToolTip": "ADSucoremaExtensibilidade\\Purchases\\UiEditorCompras.cs",
               "ViewState": "AgIAABIAAAAAAAAAAAAxwBIAAABfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-05T14:14:13.294Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 28,
-              "Title": "ValorizarOF.cs",
-              "DocumentMoniker": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\ValorizarOF.cs",
-              "RelativeDocumentMoniker": "ADSucoremaExtensibilidade\\ValorizarOF.cs",
-              "ToolTip": "C:\\Users\\jtalm\\Desktop\\suc\\ADSucoremaExtensibilidade.App\\ADSucoremaExtensibilidade\\ValorizarOF.cs",
-              "RelativeToolTip": "ADSucoremaExtensibilidade\\ValorizarOF.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAxwAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-02T10:24:37.559Z"
+              "WhenOpened": "2025-06-05T14:14:13.294Z",
+              "EditorCaption": ""
             }
           ]
         }
