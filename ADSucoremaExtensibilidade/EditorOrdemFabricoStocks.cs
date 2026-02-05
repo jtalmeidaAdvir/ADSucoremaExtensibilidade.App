@@ -341,9 +341,9 @@ namespace ADSucoremaExtensibilidade
                                             INNER JOIN 
                                                 CabecCompras C
                                                 ON L.IdCabecCompras = C.ID
-                                            WHERE 
-                                                L.Descricao LIKE '%{ordemFabrico}%' 
-                                                AND C.TipoDoc = 'VFS'";
+                                            WHERE
+                                                L.Descricao LIKE '%{ordemFabrico}%'
+                                                AND C.TipoDoc IN ('VFS', 'REC')";
 
                             StdBELista recepcao = BSO.Consulta(queryRecepcao);
                             int numRecepcoes = recepcao.NumLinhas();
@@ -532,9 +532,9 @@ namespace ADSucoremaExtensibilidade
                                     INNER JOIN 
                                         CabecCompras C
                                         ON L.IdCabecCompras = C.ID
-                                    WHERE 
-                                        L.Descricao LIKE '%{ordemFabrico}%' 
-                                        AND C.TipoDoc = 'VFS'";
+                                    WHERE
+                                        L.Descricao LIKE '%{ordemFabrico}%'
+                                        AND C.TipoDoc IN ('VFS', 'REC')";
 
                     StdBELista recepcao = BSO.Consulta(queryRecepcao);
                     int numRecepcoes = recepcao.NumLinhas();
@@ -606,7 +606,7 @@ namespace ADSucoremaExtensibilidade
                     var queryRececaoVFS = $@"SELECT TOP 1 COUNT(*) as count
                                             FROM LinhasCompras L WITH(NOLOCK)
                                             INNER JOIN CabecCompras C WITH(NOLOCK) ON L.IdCabecCompras = C.ID
-                                            WHERE L.Descricao LIKE '%{ordemFabrico}%' AND C.TipoDoc = 'VFS'";
+                                            WHERE L.Descricao LIKE '%{ordemFabrico}%' AND C.TipoDoc IN ('VFS', 'REC')";
 
                     var resultVFS = BSO.Consulta(queryRececaoVFS);
                     bool rececionado = resultVFS.DaValor<int>("count") > 0;
@@ -623,7 +623,7 @@ namespace ADSucoremaExtensibilidade
                                             FROM LinhasCompras L WITH(NOLOCK)
                                             INNER JOIN CabecCompras C WITH(NOLOCK) ON L.IdCabecCompras = C.ID
                                             INNER JOIN COP_Obras AS CO WITH(NOLOCK) ON L.ObraID = CO.ID
-                                            WHERE L.Artigo = '{artigo}' AND C.TipoDoc = 'VFA' AND CO.Codigo = '{projeto}'";
+                                            WHERE L.Artigo = '{artigo}' AND C.TipoDoc IN ('VFA', 'REC') AND CO.Codigo = '{projeto}'";
 
                     var resultVFA = BSO.Consulta(queryRececaoVFA);
                     bool rececionado = resultVFA.DaValor<int>("count") > 0;
@@ -1219,7 +1219,7 @@ namespace ADSucoremaExtensibilidade
                     INNER JOIN CabecCompras C ON L.IdCabecCompras = C.ID
                     INNER JOIN COP_Obras CO ON L.ObraID = CO.ID
                     WHERE L.Artigo IN ('{artigosStr}')
-                      AND C.TipoDoc = 'VFA' 
+                      AND C.TipoDoc IN ('VFA', 'REC')
                       AND CO.Codigo = '{projeto}'
                 )
                 SELECT 
