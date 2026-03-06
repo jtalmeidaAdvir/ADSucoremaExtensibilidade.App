@@ -1000,7 +1000,7 @@ namespace ADSucoremaExtensibilidade
                         LEFT JOIN 
                             GPR_OrdemFabrico AS OFA ON LC.Artigo = OFA.Artigo
                         WHERE 
-                            CC.TipoDoc = 'VFA'
+                            CC.TipoDoc IN ('VFA', 'ECF')
                             AND LC.Artigo IS NOT NULL
                             AND (A.Familia = '004' OR A.Familia = '024')
                             AND LC.ObraID IS NOT NULL
